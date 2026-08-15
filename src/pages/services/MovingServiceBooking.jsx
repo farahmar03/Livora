@@ -1,0 +1,439 @@
+import React, { useState } from "react";
+import {
+  MapPin,
+  Calendar,
+  Clock,
+  ChevronDown,
+  Plus,
+  Minus,
+  Phone,
+  MessageSquare,
+  Bell,
+} from "lucide-react";
+import Navbar from "@/components/layout/Navbar";
+
+// استيراد الصور بطريقة ES Modules (تغني تماماً عن استخدام require وتمنع خطأ Re-declaration)
+import mapImg from "@/assets/Group.png";
+import driverImg from "@/assets/Group 6356181.png";
+
+export default function MovingServiceBooking() {
+  // حالة شاشة التتبع بعد التأكيد
+  const [isConfirmed, setIsConfirmed] = useState(false);
+
+  // أنواع النقل
+  const [moveType, setMoveType] = useState("partial"); // partial | complete
+  const [locationScope, setLocationScope] = useState("intercity"); // local | intercity
+
+  // الخدمات الإضافية
+  const [needPacking, setNeedPacking] = useState(true);
+  const [needAssembly, setNeedAssembly] = useState(true);
+
+  // حقول نموذج التخطيط
+  const [fromAddress, setFromAddress] = useState("");
+  const [toAddress, setToAddress] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [itemsCount, setItemsCount] = useState(1);
+  const [itemsSize, setItemsSize] = useState("Medium");
+
+  // حساب السعر التقديري
+  const calculatePrice = () => {
+    let base = moveType === "complete" ? 300 : 150;
+    if (locationScope === "intercity") base += 50;
+    if (needPacking) base += 40;
+    if (needAssembly) base += 30;
+
+    if (moveType === "partial") {
+      base += (itemsCount - 1) * 15;
+    }
+    return base;
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F6EEE3]">
+      <Navbar />
+
+      <main className="max-w-7xl mx-auto px-6 py-10">
+        {/* عنوان الصفحة */}
+        <h1 className="text-2xl font-bold text-[#1B6D77] mb-8">
+          Furniture Moving Service
+        </h1>
+
+        {!isConfirmed ? (
+          /* ==========================================
+             الشاشة الأولى: نموذج تحديد الخدمة والتخطيط
+             ========================================== */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            {/* الجانب الأيسر: نوع النقل والخدمات الإضافية */}
+            <div className="lg:col-span-6 space-y-8">
+              {/* Specify Moving Type */}
+              <div>
+                <h2 className="text-base font-bold text-[#1B6D77] mb-4">
+                  Specify Moving Type
+                </h2>
+
+                <div className="space-y-3 max-w-md">
+                  {/* Partial vs Complete Move */}
+                  <div className="grid grid-cols-2 p-1 bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => setMoveType("partial")}
+                      className={`py-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                        moveType === "partial"
+                          ? "bg-[#1B6D77] text-white shadow"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      Partial Move
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMoveType("complete")}
+                      className={`py-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                        moveType === "complete"
+                          ? "bg-[#1B6D77] text-white shadow"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      Complete Move
+                    </button>
+                  </div>
+
+                  {/* Local vs InterCity Move */}
+                  <div className="grid grid-cols-2 p-1 bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => setLocationScope("local")}
+                      className={`py-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                        locationScope === "local"
+                          ? "bg-[#1B6D77] text-white shadow"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      Local Move
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLocationScope("intercity")}
+                      className={`py-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                        locationScope === "intercity"
+                          ? "bg-[#1B6D77] text-white shadow"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      InterCity Move
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Services */}
+              <div>
+                <h2 className="text-base font-bold text-[#1B6D77] mb-4">
+                  Additional Services
+                </h2>
+
+                <div className="space-y-4 max-w-md">
+                  {/* Need Packing & Unpacking */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-800">
+                      Need Packing & Unpacking
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setNeedPacking(!needPacking)}
+                      className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${
+                        needPacking ? "bg-[#1B6D77]" : "bg-gray-300"
+                      }`}
+                    >
+                      <div
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                          needPacking ? "translate-x-6" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Need Assembly & Disassembly */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-800">
+                      Need Assembly & Disassembly
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setNeedAssembly(!needAssembly)}
+                      className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${
+                        needAssembly ? "bg-[#1B6D77]" : "bg-gray-300"
+                      }`}
+                    >
+                      <div
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                          needAssembly ? "translate-x-6" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* الجانب الأيمن: نموذج التخطيط Plan Your Move */}
+            <div className="lg:col-span-6 bg-white/70 rounded-3xl p-6 shadow-sm border border-gray-100/50">
+              <h2 className="text-lg font-bold text-[#1B6D77] mb-6">
+                Plan Your Move
+              </h2>
+
+              <div className="space-y-4 text-xs font-medium text-gray-700">
+                {/* From */}
+                <div className="flex items-center justify-between gap-4">
+                  <label className="font-semibold text-gray-700 w-1/3">
+                    From
+                  </label>
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={fromAddress}
+                      onChange={(e) => setFromAddress(e.target.value)}
+                      placeholder=""
+                      className="w-full bg-white rounded-xl py-2.5 px-3 pr-9 border border-gray-200 outline-none focus:border-[#1B6D77] transition-all text-xs"
+                    />
+                    <MapPin
+                      size={16}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-600/70"
+                    />
+                  </div>
+                </div>
+
+                {/* To */}
+                <div className="flex items-center justify-between gap-4">
+                  <label className="font-semibold text-gray-700 w-1/3">
+                    To
+                  </label>
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={toAddress}
+                      onChange={(e) => setToAddress(e.target.value)}
+                      placeholder=""
+                      className="w-full bg-white rounded-xl py-2.5 px-3 pr-9 border border-gray-200 outline-none focus:border-[#1B6D77] transition-all text-xs"
+                    />
+                    <MapPin
+                      size={16}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-600/70"
+                    />
+                  </div>
+                </div>
+
+                {/* Moving Date & Time */}
+                <div className="flex items-center justify-between gap-4">
+                  <label className="font-semibold text-gray-700 w-1/3">
+                    Moving Date & Time
+                  </label>
+                  <div className="flex-1 flex gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type="date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        className="w-full bg-white rounded-xl py-2.5 px-2 pr-7 border border-gray-200 outline-none text-xs"
+                      />
+                      <Calendar
+                        size={15}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-600/70 pointer-events-none"
+                      />
+                    </div>
+                    <div className="relative flex-1">
+                      <input
+                        type="time"
+                        value={time}
+                        onChange={(e) => setTime(e.target.value)}
+                        className="w-full bg-white rounded-xl py-2.5 px-2 pr-7 border border-gray-200 outline-none text-xs"
+                      />
+                      <Clock
+                        size={15}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-600/70 pointer-events-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* حقول النقل الجزئي فقط (تختفي في النقل الكامل) */}
+                {moveType === "partial" && (
+                  <>
+                    {/* Furniture Items Num */}
+                    <div className="flex items-center justify-between gap-4">
+                      <label className="font-semibold text-gray-700 w-1/3">
+                        Furniture Items Num
+                      </label>
+                      <div className="flex-1 flex items-center bg-white rounded-xl border border-gray-200 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setItemsCount(Math.max(1, itemsCount - 1))
+                          }
+                          className="p-2.5 bg-amber-100/60 hover:bg-amber-100 text-amber-800 transition-colors"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="flex-1 text-center font-bold text-sm text-gray-800">
+                          {itemsCount}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setItemsCount(itemsCount + 1)}
+                          className="p-2.5 bg-amber-100/60 hover:bg-amber-100 text-amber-800 transition-colors"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Items Size */}
+                    <div className="flex items-center justify-between gap-4">
+                      <label className="font-semibold text-gray-700 w-1/3">
+                        Items Size
+                      </label>
+                      <div className="relative flex-1">
+                        <select
+                          value={itemsSize}
+                          onChange={(e) => setItemsSize(e.target.value)}
+                          className="w-full bg-white rounded-xl py-2.5 px-3 pr-8 border border-gray-200 outline-none appearance-none text-xs text-gray-700"
+                        >
+                          <option value="Small">Small</option>
+                          <option value="Medium">Medium</option>
+                          <option value="Large">Large</option>
+                        </select>
+                        <ChevronDown
+                          size={16}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-600/70 pointer-events-none"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Estimated Price */}
+              <div className="mt-6 bg-[#E3ECEB] rounded-2xl p-4 flex items-center justify-center gap-2">
+                <span className="text-xs font-semibold text-[#1B6D77]">
+                  Estimated Price :
+                </span>
+                <span className="text-xl font-bold text-[#1B6D77]">
+                  ${calculatePrice()}
+                </span>
+              </div>
+
+              {/* Confirm Button */}
+              <button
+                type="button"
+                onClick={() => setIsConfirmed(true)}
+                className="w-full mt-5 bg-[#D58C38] hover:bg-[#c27c2b] text-white font-bold py-3.5 px-6 rounded-2xl shadow-md transition-all cursor-pointer text-sm"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* ==========================================
+             الشاشة الثانية: شاشة التتبع الحي Live Tracking
+             ========================================== */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            {/* الجانب الأيسر: كرت الخريطة والتتبع */}
+            <div className="lg:col-span-7 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="bg-[#1B6D77] text-white py-3 text-center font-bold text-base">
+                Live Tracking
+              </div>
+
+              <div className="relative p-3 bg-gray-50">
+                {/* شارة التنبيه المنسدلة على الخريطة */}
+                <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-[#EFE3D3] text-gray-800 px-4 py-2 rounded-2xl shadow-md border border-amber-200/50 flex items-center gap-2 text-xs font-semibold">
+                  <Bell size={16} className="text-amber-800 fill-amber-800" />
+                  <span>The truck is on the way</span>
+                </div>
+
+                {/* صورة الخريطة */}
+                <img
+                  src={mapImg}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src =
+                      "https://placehold.co/600x350/e2e8f0/1b6d77?text=Map+Tracking+View";
+                  }}
+                  alt="Live Map Tracking"
+                  className="w-full rounded-2xl object-cover h-[350px]"
+                />
+              </div>
+            </div>
+
+            {/* الجانب الأيمن: تفاصيل السائق والخدمة */}
+            <div className="lg:col-span-5 space-y-6">
+              {/* كرت السائق */}
+              <div className="bg-[#EFE3D3] rounded-3xl p-4 flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={driverImg}
+                    alt="Sami Ahmed"
+                    className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-xs"
+                  />
+                  <div>
+                    <h3 className="font-bold text-gray-800 text-sm">
+                      Sami Ahmed
+                    </h3>
+                    <p className="text-xs text-gray-500 font-medium">
+                      Delivery person
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button className="w-9 h-9 rounded-full bg-[#1B6D77] text-white flex items-center justify-center shadow-sm hover:opacity-90 transition-all cursor-pointer">
+                    <Phone size={16} />
+                  </button>
+                  <button className="w-9 h-9 rounded-full bg-[#1B6D77] text-white flex items-center justify-center shadow-sm hover:opacity-90 transition-all cursor-pointer">
+                    <MessageSquare size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* كرت Service Details */}
+              <div className="bg-white/70 rounded-3xl p-6 shadow-sm border border-gray-100/50">
+                <h3 className="text-base font-bold text-[#1B6D77] mb-5">
+                  Service Details
+                </h3>
+
+                <div className="space-y-4 text-xs font-semibold text-gray-700 mb-8">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Clock size={16} className="text-gray-800" />
+                      <span>Remaining Time</span>
+                    </div>
+                    <span className="font-bold text-gray-900">20 min</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <span className="font-bold text-base leading-none">
+                        #
+                      </span>
+                      <span>Booking ID</span>
+                    </div>
+                    <span className="font-bold text-gray-900">#1258</span>
+                  </div>
+                </div>
+
+                {/* زر Pay Now */}
+                <button
+                  type="button"
+                  onClick={() => alert("تمت عملية الدفع بنجاح!")}
+                  className="w-full bg-[#D58C38] hover:bg-[#c27c2b] text-white font-bold py-3.5 px-6 rounded-2xl shadow-md transition-all cursor-pointer text-sm"
+                >
+                  Pay Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
