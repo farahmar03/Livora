@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Star, Heart, ShoppingCart, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import sofasIcon from "@/assets/sofas1.png";
 import lampsIcon from "@/assets/lamps.png";
@@ -8,177 +8,290 @@ import bedsIcon from "@/assets/beds.png";
 import bathroomIcon from "@/assets/bathroom.png";
 import kitchenIcon from "@/assets/kitchen.png";
 
+// استيراد صور المنتج السامبل الرئيسي
+import teal1 from "@/assets/chair2.png";
+import gray1 from "@/assets/gray-chair1.png";
+import orange1 from "@/assets/orang-chair2.png";
+
+// استخدام ProductCard المستورد من مشروعك لضمان مطابقة التصميم
+import ProductCard from "@/components/common/ProductCard";
+
 const categories = [
-  { key: "sofas", label: "Sofas", icon: sofasIcon, img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=450&fit=crop" },
-  { key: "lamps", label: "Lamps", icon: lampsIcon, img: "https://images.unsplash.com/photo-1507473885765-e6ed0579adf8?w=600&h=450&fit=crop" },
-  { key: "chairs", label: "Chairs", icon: chairsIcon, img: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=600&h=450&fit=crop" },
-  { key: "beds", label: "Beds", icon: bedsIcon, img: "https://images.unsplash.com/photo-1505693416388-b5d4f03e03e6?w=600&h=450&fit=crop" },
-  { key: "bathroom", label: "Bathroom", icon: bathroomIcon, img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&h=450&fit=crop" },
-  { key: "kitchen", label: "Kitchen", icon: kitchenIcon, img: "https://images.unsplash.com/photo-1556911220-e7189d5bcd24?w=600&h=450&fit=crop" },
+  {
+    key: "sofas",
+    label: "Sofas",
+    icon: sofasIcon,
+    img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=450&fit=crop",
+  },
+  {
+    key: "lamps",
+    label: "Lamps",
+    icon: lampsIcon,
+    img: "https://images.unsplash.com/photo-1507473885765-e6ed0579adf8?w=600&h=450&fit=crop",
+  },
+  {
+    key: "chairs",
+    label: "Chairs",
+    icon: chairsIcon,
+    img: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=600&h=450&fit=crop",
+  },
+  {
+    key: "beds",
+    label: "Beds",
+    icon: bedsIcon,
+    img: "https://images.unsplash.com/photo-1505693416388-b5d4f03e03e6?w=600&h=450&fit=crop",
+  },
+  {
+    key: "bathroom",
+    label: "Bathroom",
+    icon: bathroomIcon,
+    img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&h=450&fit=crop",
+  },
+  {
+    key: "kitchen",
+    label: "Kitchen",
+    icon: kitchenIcon,
+    img: "https://images.unsplash.com/photo-1556911220-e7189d5bcd24?w=600&h=450&fit=crop",
+  },
 ];
 
+// --- تعريف منتج السامبل الملون في فئة الكراسي ---
+const sampleChairProduct = {
+  id: "sample-chair-1",
+  categoryKey: "chairs",
+  name: "Nordic OAK Chair",
+  title: "Nordic OAK Chair",
+  subtitle: "Emerald Green / Linen",
+  price: "$1,250",
+  rating: 4.9,
+  discount: true,
+  isSample: true,
+  colors: [
+    { name: "Teal", hex: "#1D8B96", image: teal1 },
+    { name: "Gray", hex: "#A8B2C1", image: gray1 },
+    { name: "Orange", hex: "#C77D24", image: orange1 },
+  ],
+};
+
+// --- قاعدة بيانات المنتجات (3 منتجات لكل فئة) ---
 const productsByCategory = {
   sofas: [
     {
-      images: [
-        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop",
-      ],
-      discount: false,
+      id: "sofa-1",
+      categoryKey: "sofas",
+      name: "Serene Arc Sofa",
+      title: "Serene Arc Sofa",
+      subtitle: "Emerald Green / Linen",
+      price: "$820",
+      rating: 4.9,
+      image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
     {
-      images: [
-        "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop",
-      ],
-      discount: false,
+      id: "sofa-2",
+      categoryKey: "sofas",
+      name: "Modern Velvet Couch",
+      title: "Modern Velvet Couch",
+      subtitle: "Royal Blue / Velvet",
+      price: "$1,150",
+      rating: 4.8,
+      image: "https://images.unsplash.com/photo-1550581190-9c1c08221252?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
     {
-      images: [
-        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600&h=450&fit=crop",
-      ],
-      discount: true,
+      id: "sofa-3",
+      categoryKey: "sofas",
+      name: "Minimalist Fabric Sofa",
+      title: "Minimalist Fabric Sofa",
+      subtitle: "Warm Beige / Cotton",
+      price: "$950",
+      rating: 4.7,
+      image:
+        "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
   ],
   lamps: [
     {
-      images: [
-        "https://images.unsplash.com/photo-1507473885765-e6ed0579adf8?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1583847661886-9c1d7a1136d3?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&h=450&fit=crop",
-      ],
-      discount: false,
+      id: "lamp-1",
+      categoryKey: "lamps",
+      name: "Nordic Desk Lamp",
+      title: "Nordic Desk Lamp",
+      subtitle: "Matte Black / Wood",
+      price: "$180",
+      rating: 4.8,
+      image:
+        "https://images.unsplash.com/photo-1507473885765-e6ed0579adf8?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
     {
-      images: [
-        "https://images.unsplash.com/photo-1583847661886-9c1d7a1136d3?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1507473885765-e6ed0579adf8?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&h=450&fit=crop",
-      ],
-      discount: false,
+      id: "lamp-2",
+      categoryKey: "lamps",
+      name: "Standing Arc Lamp",
+      title: "Standing Arc Lamp",
+      subtitle: "Brushed Brass / Metal",
+      price: "$290",
+      rating: 4.9,
+      image:
+        "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
     {
-      images: [
-        "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1507473885765-e6ed0579adf8?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1583847661886-9c1d7a1136d3?w=600&h=450&fit=crop",
-      ],
-      discount: true,
+      id: "lamp-3",
+      categoryKey: "lamps",
+      name: "Pendant Ceiling Light",
+      title: "Pendant Ceiling Light",
+      subtitle: "Smoked Glass / Steel",
+      price: "$210",
+      rating: 4.6,
+      image:
+        "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
   ],
   chairs: [
+    sampleChairProduct, // المنتج السامبل يظهر هنا ضمن فئة الكراسي
     {
-      images: [
-        "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1503602642458-2321114458f6?w=600&h=450&fit=crop",
-      ],
-      discount: false,
+      id: "chair-2",
+      categoryKey: "chairs",
+      name: "Ergonomic Lounge Chair",
+      title: "Ergonomic Lounge Chair",
+      subtitle: "Charcoal Leather",
+      price: "$680",
+      rating: 4.8,
+      image:
+        "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
     {
-      images: [
-        "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1503602642458-2321114458f6?w=600&h=450&fit=crop",
-      ],
-      discount: false,
-    },
-    {
-      images: [
-        "https://images.unsplash.com/photo-1503602642458-2321114458f6?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600&h=450&fit=crop",
-      ],
-      discount: true,
+      id: "chair-3",
+      categoryKey: "chairs",
+      name: "Minimalist Dining Chair",
+      title: "Minimalist Dining Chair",
+      subtitle: "Walnut / Cushion",
+      price: "$320",
+      rating: 4.7,
+      image:
+        "https://images.unsplash.com/photo-1503602642458-232111445657?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
   ],
   beds: [
     {
-      images: [
-        "https://images.unsplash.com/photo-1505693416388-b5d4f03e03e6?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1517705008128-361805f42e86?w=600&h=450&fit=crop",
-      ],
-      discount: false,
+      id: "bed-1",
+      categoryKey: "beds",
+      name: "King Upholstered Bed",
+      title: "King Upholstered Bed",
+      subtitle: "Slate Gray / Oak",
+      price: "$1,450",
+      rating: 4.9,
+      image:
+        "https://images.unsplash.com/photo-1505693416388-b5d4f03e03e6?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
     {
-      images: [
-        "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1505693416388-b5d4f03e03e6?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1517705008128-361805f42e86?w=600&h=450&fit=crop",
-      ],
-      discount: false,
+      id: "bed-2",
+      categoryKey: "beds",
+      name: "Wooden Platform Bed",
+      title: "Wooden Platform Bed",
+      subtitle: "Solid Walnut Frame",
+      price: "$1,200",
+      rating: 4.8,
+      image:
+        "https://images.unsplash.com/photo-1540518614846-7ede433c5163?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
     {
-      images: [
-        "https://images.unsplash.com/photo-1517705008128-361805f42e86?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1505693416388-b5d4f03e03e6?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600&h=450&fit=crop",
-      ],
-      discount: true,
+      id: "bed-3",
+      categoryKey: "beds",
+      name: "Cozy Tufted Bed",
+      title: "Cozy Tufted Bed",
+      subtitle: "Cream Fabric Frame",
+      price: "$1,350",
+      rating: 4.7,
+      image:
+        "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
   ],
   bathroom: [
     {
-      images: [
-        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1595429035839-c99c298ffdde?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1584305574647-0cc9ebec5fa3?w=600&h=450&fit=crop",
-      ],
-      discount: false,
+      id: "bath-1",
+      categoryKey: "bathroom",
+      name: "Modern Bathroom Vanity",
+      title: "Modern Bathroom Vanity",
+      subtitle: "Marble Top / Oak",
+      price: "$890",
+      rating: 4.8,
+      image:
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
     {
-      images: [
-        "https://images.unsplash.com/photo-1595429035839-c99c298ffdde?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1584305574647-0cc9ebec5fa3?w=600&h=450&fit=crop",
-      ],
-      discount: false,
+      id: "bath-2",
+      categoryKey: "bathroom",
+      name: "Freestanding Soaking Tub",
+      title: "Freestanding Soaking Tub",
+      subtitle: "White Acrylic Finish",
+      price: "$1,600",
+      rating: 4.9,
+      image:
+        "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
     {
-      images: [
-        "https://images.unsplash.com/photo-1584305574647-0cc9ebec5fa3?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1595429035839-c99c298ffdde?w=600&h=450&fit=crop",
-      ],
-      discount: true,
+      id: "bath-3",
+      categoryKey: "bathroom",
+      name: "LED Smart Mirror",
+      title: "LED Smart Mirror",
+      subtitle: "Anti-Fog / Dimmable",
+      price: "$240",
+      rating: 4.7,
+      image:
+        "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
   ],
   kitchen: [
     {
-      images: [
-        "https://images.unsplash.com/photo-1556911220-e7189d5bcd24?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&h=450&fit=crop",
-      ],
-      discount: false,
+      id: "kitchen-1",
+      categoryKey: "kitchen",
+      name: "Marble Kitchen Island",
+      title: "Marble Kitchen Island",
+      subtitle: "White Marble / Brass",
+      price: "$1,850",
+      rating: 4.9,
+      image: "https://images.unsplash.com/photo-1556911220-e7189d5bcd24?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
     {
-      images: [
-        "https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1556911220-e7189d5bcd24?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&h=450&fit=crop",
-      ],
-      discount: false,
+      id: "kitchen-2",
+      categoryKey: "kitchen",
+      name: "Minimalist Bar Stool",
+      title: "Minimalist Bar Stool",
+      subtitle: "Black Metal / Leather",
+      price: "$190",
+      rating: 4.8,
+      image:
+        "https://images.unsplash.com/photo-1503602642458-232111445657?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
     {
-      images: [
-        "https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1556911220-e7189d5bcd24?w=600&h=450&fit=crop",
-        "https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?w=600&h=450&fit=crop",
-      ],
-      discount: true,
+      id: "kitchen-3",
+      categoryKey: "kitchen",
+      name: "Wooden Dining Buffet",
+      title: "Wooden Dining Buffet",
+      subtitle: "Solid Oak Cabinet",
+      price: "$980",
+      rating: 4.7,
+      image:
+        "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=600",
+      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
     },
   ],
 };
 
-const PRODUCT_COLORS = ["#7A562C", "#A0A4AC", "#1B6D77"];
-
-function CategoryIcon({ src, active, size = 60 }) {
+function CategoryIcon({ src, active, size = 42 }) {
   return (
     <span
       aria-hidden="true"
@@ -195,89 +308,32 @@ function CategoryIcon({ src, active, size = 60 }) {
         maskRepeat: "no-repeat",
         WebkitMaskPosition: "center",
         maskPosition: "center",
-        transition: "background-color 200ms ease",
+        transition: "background-color 150ms ease",
       }}
     />
   );
 }
 
-function ProductCard({ product, index }) {
-  const [activeColorIndex, setActiveColorIndex] = useState(0);
+export default function CategoriesSection({ onNavigate }) {
+  // الفئة النشطة الحالية
+  const [activeTab, setActiveTab] = useState("sofas");
+  const activeCategoryData = categories.find((cat) => cat.key === activeTab);
 
-  return (
-    <div 
-      data-aos="fade-up" 
-      data-aos-delay={index * 150}
-      data-aos-duration="800"
-      className="bg-white rounded-2xl sm:rounded-3xl border border-[var(--color-teal)]/40 hover:border-[var(--color-teal)] transition-colors duration-300 overflow-hidden flex flex-col min-h-[360px] sm:min-h-[420px]"
-    >
-      <div className="relative">
-        <img
-          src={product.images[activeColorIndex]}
-          alt="Product"
-          className="w-full h-48 sm:h-56 md:h-64 object-cover block"
-        />
-        <div className="absolute top-3 left-3 bg-white rounded-full pl-2 pr-3 py-1 flex items-center gap-1 shadow-sm">
-          <Star size={14} fill="#FEC803" stroke="#FEC803" />
-          <span className="text-xs font-semibold text-gray-800">4.9</span>
-        </div>
-        <button
-          type="button"
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
-        >
-          <Heart size={16} className="text-gray-500" />
-        </button>
-        {product.discount && (
-          <div className="absolute bottom-3 right-0 bg-[#DA0F12] text-white text-xs font-bold px-3 py-1 rounded-l-lg">
-            Discount 10%
-          </div>
-        )}
-      </div>
-      <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between">
-        <div>
-          <h3 className="font-semibold text-gray-900 text-base sm:text-lg">Nordic Oak Chair</h3>
-          <p className="text-sm text-gray-500 mb-2">Emerald Green / Linen</p>
-          <p className="font-bold text-gray-900 text-base sm:text-lg mb-3">$1,250</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {PRODUCT_COLORS.map((color, idx) => (
-              <button
-                key={color}
-                onClick={() => setActiveColorIndex(idx)}
-                aria-label={`Select color ${idx + 1}`}
-                className={`w-5 h-5 rounded-full border border-black/10 transition-all duration-200 hover:scale-110 ${
-                  activeColorIndex === idx ? "ring-2 ring-[var(--color-teal)] ring-offset-2" : ""
-                }`}
-                style={{ backgroundColor: color }}
-              />
-            ))}
-          </div>
-          <button
-            type="button"
-            aria-label="Add to cart"
-            className="text-[var(--color-teal)] hover:opacity-80 transition-opacity"
-          >
-            <ShoppingCart size={22} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+  // جلب 3 منتجات خاصة بالفئة النشطة المحددة
+  const displayedProducts =
+    productsByCategory[activeTab] || productsByCategory.sofas;
 
-export default function CategoriesSection({ onNavigate }) { // 1. استقبال onNavigate
-  const [active, setActive] = useState("sofas");
-  const products = productsByCategory[active];
-  const activeCategory = categories.find((cat) => cat.key === active);
-
-  // 2. دالة الضغط على زر View All
-  const handleViewAll = () => {
-    onNavigate("/categories"); // تمرير المسار لـ HomePage
+  const handleGoToCategoriesPage = (categoryKey) => {
+    if (onNavigate) {
+      onNavigate(`/categories?category=${categoryKey}`);
+    }
   };
 
   return (
-    <section id="CategoriesSection" className="w-full bg-[var(--color-page)] py-10 sm:py-12 md:py-16 overflow-hidden">
+    <section
+      id="CategoriesSection"
+      className="w-full bg-[var(--color-page)] py-10 sm:py-12 md:py-16 overflow-hidden"
+    >
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
         <div className="flex justify-center sm:justify-end mb-4">
           <h2 className="text-[var(--color-teal)] text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
@@ -290,9 +346,9 @@ export default function CategoriesSection({ onNavigate }) { // 1. استقبال
           <div className="rounded-3xl overflow-hidden border-2 border-[var(--color-teal)]">
             <div className="aspect-[4/3] sm:aspect-[16/9]">
               <img
-                key={active}
-                src={activeCategory.img}
-                alt={activeCategory.label}
+                key={activeTab}
+                src={activeCategoryData.img}
+                alt={activeCategoryData.label}
                 data-aos="zoom-in"
                 data-aos-duration="500"
                 className="w-full h-full object-cover"
@@ -303,18 +359,20 @@ export default function CategoriesSection({ onNavigate }) { // 1. استقبال
           <div className="mt-5 -mx-4 px-4 overflow-x-auto">
             <div className="flex gap-4 w-max sm:w-full sm:grid sm:grid-cols-6 sm:gap-3">
               {categories.map(({ key, label, icon }) => {
-                const isActive = active === key;
+                const isActive = activeTab === key;
                 return (
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setActive(key)}
+                    onClick={() => setActiveTab(key)}
                     className="flex flex-col items-center gap-2 group focus:outline-none shrink-0 w-20 sm:w-auto transition-transform duration-200 hover:-translate-y-1"
                   >
                     <div
                       className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm"
                       style={{
-                        backgroundColor: isActive ? "var(--color-teal)" : "#E7E2D4",
+                        backgroundColor: isActive
+                          ? "var(--color-teal)"
+                          : "#E7E2D4",
                         transform: isActive ? "scale(1.05)" : "scale(1)",
                       }}
                     >
@@ -322,7 +380,9 @@ export default function CategoriesSection({ onNavigate }) { // 1. استقبال
                     </div>
                     <span
                       className="text-sm sm:text-base font-medium text-center transition-colors duration-200"
-                      style={{ color: isActive ? "var(--color-orange)" : "#2C2C2A" }}
+                      style={{
+                        color: isActive ? "var(--color-orange)" : "#2C2C2A",
+                      }}
                     >
                       {label}
                     </span>
@@ -334,7 +394,10 @@ export default function CategoriesSection({ onNavigate }) { // 1. استقبال
         </div>
 
         {/* Desktop layout */}
-        <div className="hidden lg:block relative w-full" style={{ aspectRatio: "1159 / 676" }}>
+        <div
+          className="hidden lg:block relative w-full"
+          style={{ aspectRatio: "1159 / 676" }}
+        >
           <div
             className="absolute box-border bg-[var(--color-page)] border-2 border-[var(--color-teal)] rounded-[15px]"
             style={{
@@ -351,27 +414,33 @@ export default function CategoriesSection({ onNavigate }) { // 1. استقبال
           >
             <div className="grid grid-cols-2 gap-x-8 gap-y-6">
               {categories.map(({ key, label, icon }) => {
-                const isActive = active === key;
+                const isActive = activeTab === key;
                 return (
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setActive(key)}
+                    onClick={() => setActiveTab(key)}
                     className="flex flex-col items-center gap-2 group focus:outline-none transition-transform duration-300 hover:scale-105"
                   >
                     <div
                       className="w-24 h-24 xl:w-28 xl:h-28 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm"
                       style={{
-                        backgroundColor: isActive ? "var(--color-teal)" : "#E7E2D4",
-                        boxShadow: isActive ? "0 8px 20px rgba(27, 109, 119, 0.25)" : "none",
+                        backgroundColor: isActive
+                          ? "var(--color-teal)"
+                          : "#E7E2D4",
+                        boxShadow: isActive
+                          ? "0 8px 20px rgba(27, 109, 119, 0.25)"
+                          : "none",
                         transform: isActive ? "scale(1.06)" : "scale(1)",
                       }}
                     >
-                      <CategoryIcon src={icon} active={isActive} />
+                      <CategoryIcon src={icon} active={isActive} size={42} />
                     </div>
                     <span
                       className="text-lg xl:text-2xl font-medium transition-colors duration-200"
-                      style={{ color: isActive ? "var(--color-orange)" : "#2C2C2A" }}
+                      style={{
+                        color: isActive ? "var(--color-orange)" : "#2C2C2A",
+                      }}
                     >
                       {label}
                     </span>
@@ -391,9 +460,9 @@ export default function CategoriesSection({ onNavigate }) { // 1. استقبال
             }}
           >
             <img
-              key={active}
-              src={activeCategory.img}
-              alt={activeCategory.label}
+              key={activeTab}
+              src={activeCategoryData.img}
+              alt={activeCategoryData.label}
               data-aos="zoom-in"
               data-aos-duration="600"
               className="w-full h-full object-cover"
@@ -426,17 +495,23 @@ export default function CategoriesSection({ onNavigate }) { // 1. استقبال
           </div>
         </div>
 
+        {/* عرض المنتجات الثلاثة التابعة للفئة المحددة */}
         <div className="mt-8 sm:mt-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-            {products.map((product, i) => (
-              <ProductCard key={i} index={i} product={product} />
+            {displayedProducts.map((item, index) => (
+              <div
+                key={item.id}
+                onClick={() => handleGoToCategoriesPage(item.categoryKey)}
+                className="cursor-pointer"
+              >
+                <ProductCard product={item} index={index} />
+              </div>
             ))}
           </div>
 
-          {/* 3. زر View All المعدل */}
           <div className="flex justify-center sm:justify-end mt-6">
             <button
-              onClick={handleViewAll}
+              onClick={() => handleGoToCategoriesPage(activeTab)}
               className="flex items-center gap-2 font-medium text-[var(--color-teal)] text-lg sm:text-xl md:text-2xl hover:opacity-80 transition-opacity cursor-pointer"
             >
               View All

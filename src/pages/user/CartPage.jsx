@@ -4,60 +4,25 @@ import { useNavigate } from "react-router-dom";
 import { FiTrash2, FiMinus, FiPlus, FiChevronRight } from "react-icons/fi";
 import { FaTruck } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
+import { useCart } from "@/context/CartContext";
 
 export default function CartPage() {
   const navigate = useNavigate();
-
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Nordic OAk Chair",
-      material: "Emerald Green / Linen",
-      price: 1250,
-      quantity: 1,
-      checked: true,
-      image: "https://via.placeholder.com/100",
-    },
-    {
-      id: 2,
-      name: "Luna Velvet Sofa",
-      material: "Nartural Oak / Linen",
-      price: 420,
-      quantity: 2,
-      checked: true,
-      image: "https://via.placeholder.com/100",
-    },
-  ]);
+  const {
+    cartItems,
+    updateQuantity,
+    removeFromCart,
+    getTotalPrice,
+    toggleSelectItem,
+    parsePrice,
+    selectedItems,
+  } = useCart();
 
   const [promoCode, setPromoCode] = useState("");
 
-  const updateQuantity = (id, delta) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
-    );
-  };
-
-  const toggleCheck = (id) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    );
-  };
-
-  const removeItem = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const subtotal = cartItems
-    .filter((item) => item.checked)
-    .reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-  const deliveryFee = 45;
+  const subtotal = getTotalPrice();
+  // تحسب رسوم التوصيل فقط إذا كانت هناك عناصر محددة للشراء
+  const deliveryFee = selectedItems.length > 0 ? 45 : 0;
   const discount = 0;
   const totalPayment = subtotal + deliveryFee - discount;
 
@@ -65,78 +30,85 @@ export default function CartPage() {
     <div className="min-h-screen bg-[var(--color-page)] pb-16">
       <Navbar />
       <div className="max-w-7xl mx-auto px-6 md:px-12 pt-8">
-        <h1 className="text-3xl font-bold mb-1.5 text-[var(--color-teal)]">My Cart</h1>
+        <h1 className="text-3xl font-bold mb-1.5 text-[var(--color-teal)]">
+          My Cart
+        </h1>
         <p className="text-gray-700 mb-6 font-semibold text-base sm:text-lg">
           Review your items and proceed to checkout
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
           {/* الجزء الأيسر: كروت المنتجات */}
           <div className="lg:col-span-5 space-y-4">
-            {cartItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white rounded-3xl p-5 flex items-center gap-4 shadow-sm border border-gray-100 relative"
-              >
-                <input
-                  type="checkbox"
-                  checked={item.checked}
-                  onChange={() => toggleCheck(item.id)}
-                  className="w-4 h-4 accent-[var(--color-teal)] rounded-md cursor-pointer shrink-0"
-                />
+            {cartItems.length === 0 ? (
+              <div className="bg-white rounded-3xl p-8 text-center text-gray-500 font-medium border border-gray-100">
+                Your cart is empty.
+              </div>
+            ) : (
+              cartItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-3xl p-5 flex items-center gap-4 shadow-sm border border-gray-100 relative"
+                >
+                  <input
+                    type="checkbox"
+                    checked={item.selected ?? true}
+                    onChange={() => toggleSelectItem(item.id)}
+                    className="w-4 h-4 accent-[var(--color-teal)] rounded-md cursor-pointer shrink-0"
+                  />
 
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-20 h-20 object-cover rounded-2xl shrink-0"
-                />
+                  <img
+                    src={item.image}
+                    alt={item.name || item.title}
+                    className="w-20 h-20 object-cover rounded-2xl shrink-0"
+                  />
 
-                <div className="flex-1 min-w-0 pr-1">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-bold text-gray-900 text-sm truncate">
-                      {item.name}
-                    </h3>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="text-[var(--color-teal)] hover:text-red-500 transition-colors p-1 cursor-pointer shrink-0"
-                    >
-                      <FiTrash2 size={16} />
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1 truncate">
-                    {item.material}
-                  </p>
-
-                  <div className="flex justify-between items-center mt-3">
-                    <span className="font-bold text-gray-900 text-sm">
-                      ${item.price.toLocaleString()}
-                    </span>
-
-                    <div className="flex items-center gap-2 bg-[#F9F3EC] px-2.5 py-1 rounded-full border border-gray-200/60 shrink-0">
+                  <div className="flex-1 min-w-0 pr-1">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-bold text-gray-900 text-sm truncate">
+                        {item.name || item.title}
+                      </h3>
                       <button
-                        onClick={() => updateQuantity(item.id, -1)}
-                        className="text-[var(--color-teal)] hover:bg-white rounded-full p-0.5 transition-colors cursor-pointer"
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-[var(--color-teal)] hover:text-red-500 transition-colors p-1 cursor-pointer shrink-0"
                       >
-                        <FiMinus size={12} />
+                        <FiTrash2 size={16} />
                       </button>
-                      <span className="font-bold text-gray-800 text-xs w-4 text-center">
-                        {item.quantity}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1 truncate">
+                      {item.material || item.color}
+                    </p>
+
+                    <div className="flex justify-between items-center mt-3">
+                      <span className="font-bold text-gray-900 text-sm">
+                        ${parsePrice(item.price).toLocaleString()}
                       </span>
-                      <button
-                        onClick={() => updateQuantity(item.id, 1)}
-                        className="text-[var(--color-teal)] hover:bg-white rounded-full p-0.5 transition-colors cursor-pointer"
-                      >
-                        <FiPlus size={12} />
-                      </button>
+
+                      <div className="flex items-center gap-2 bg-[#F9F3EC] px-2.5 py-1 rounded-full border border-gray-200/60 shrink-0">
+                        <button
+                          onClick={() => updateQuantity(item.id, -1)}
+                          className="text-[var(--color-teal)] hover:bg-white rounded-full p-0.5 transition-colors cursor-pointer"
+                        >
+                          <FiMinus size={12} />
+                        </button>
+                        <span className="font-bold text-gray-800 text-xs w-4 text-center">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.id, 1)}
+                          className="text-[var(--color-teal)] hover:bg-white rounded-full p-0.5 transition-colors cursor-pointer"
+                        >
+                          <FiPlus size={12} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
 
-            {/* شريط خدمة النقل - الخط يظهر فقط عند وضع الماوس (hover:underline) */}
-            <div 
+            {/* شريط خدمة النقل */}
+            <div
               onClick={() => navigate("/services/moving")}
               className="bg-[#E5ECE9] rounded-2xl p-4 flex items-center justify-between text-[var(--color-teal)] font-medium text-xs cursor-pointer hover:bg-[#dbe4e0] transition-colors shadow-sm group"
             >
@@ -198,13 +170,23 @@ export default function CartPage() {
             </div>
 
             <button
-              onClick={() => navigate("/payment")}
-              className="w-full bg-[var(--color-orange)] hover:opacity-90 text-white font-bold py-3.5 rounded-2xl shadow-md transition-all text-base cursor-pointer"
+              onClick={() => {
+                if (selectedItems.length === 0) {
+                  alert("Please select at least one item to proceed.");
+                  return;
+                }
+                navigate("/payment");
+              }}
+              disabled={selectedItems.length === 0}
+              className={`w-full font-bold py-3.5 rounded-2xl shadow-md transition-all text-base cursor-pointer ${
+                selectedItems.length > 0
+                  ? "bg-[var(--color-orange)] hover:opacity-90 text-white"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             >
-              Checkout
+              Checkout ({selectedItems.length})
             </button>
           </div>
-
         </div>
       </div>
     </div>

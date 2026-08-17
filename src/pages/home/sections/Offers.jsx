@@ -1,223 +1,396 @@
-import React, { useRef, useEffect } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import React, { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+// 1. استيراد هوك التوثيق الخاص بتطبيقك (عدلي المسار حسب المجلد لديك)
+import { useAuth } from "@/context/AuthContext";
 
-import "swiper/css";
-import "swiper/css/navigation";
+import offer1 from "@/assets/offer1.png";
+import offer2 from "@/assets/offer2.png";
+import offer3 from "@/assets/offer3.png";
+import offer4 from "@/assets/offer4.png";
+import offer5 from "@/assets/offer5.png";
+import offer6 from "@/assets/offer6.png";
+import offer7 from "@/assets/offer7.png";
+import offer8 from "@/assets/offer8.png";
+import offer9 from "@/assets/offer9.png";
+import offer10 from "@/assets/offer10.png";
+import offer11 from "@/assets/offer11.png";
+import offer12 from "@/assets/offer12.png";
 
-const products = [
-  { img: "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=800" },
-  { img: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800" },
-  { img: "https://images.unsplash.com/photo-1616627561950-9f746e330187?w=800" },
-  { img: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=800" },
-  { img: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=800" },
-  { img: "https://images.unsplash.com/photo-1615529162924-f8605388461d?w=800" },
+const chairs = [
+  { id: 1, alt: "مقعد مفرد 1", src: offer1 },
+  { id: 2, alt: "مقعد مفرد 2", src: offer2 },
+  { id: 3, alt: "مقعد مفرد 3", src: offer3 },
+  { id: 4, alt: "مقعد مفرد 4", src: offer4 },
+  { id: 5, alt: "مقعد مفرد 5", src: offer5 },
+  { id: 6, alt: "مقعد مفرد 6", src: offer6 },
+  { id: 7, alt: "مقعد مفرد 7", src: offer7 },
+  { id: 8, alt: "مقعد مفرد 8", src: offer8 },
+  { id: 9, alt: "مقعد مفرد 9", src: offer9 },
+  { id: 10, alt: "مقعد مفرد 10", src: offer10 },
+  { id: 11, alt: "مقعد مفرد 11", src: offer11 },
+  { id: 12, alt: "مقعد مفرد 12", src: offer12 },
 ];
 
-// أقصى زاوية ميلان وأقصى ارتفاع/هبوط للكروت الطرفية
-const MAX_ROTATE = 20; // درجة
-const MAX_TRANSLATE_Y = 80; // بكسل
+export default function Offers({ id = "offers" }) {
+  const navigate = useNavigate();
 
-export default function OffersSection() {
-  const prevRef = useRef(null);
-  const nextRef = useRef(null);
-  const swiperRef = useRef(null);
+  // 2. فحص حالة التسجيل (يمكن استبدال isAuthenticated بحسب القيمة المستخدمة في مشروعك مثل user أو token)
+  const { isAuthenticated } = useAuth();
 
-  // بيحسب ويطبق التحويل (rotate + translateY) على كل سلايد حسب بعده عن المنتصف
-  const applyArcTransform = (swiper) => {
-    swiper.slides.forEach((slideEl, index) => {
-      const progress = swiper.slides[index].progress;
-      const clamped = Math.max(-1, Math.min(1, progress));
+  const trackRef = useRef(null);
+  const isDown = useRef(false);
+  const startX = useRef(0);
+  const scrollStart = useRef(0);
+  const [dragging, setDragging] = useState(false);
 
-      const rotate = clamped * MAX_ROTATE;
-      const translateY = Math.abs(clamped) * MAX_TRANSLATE_Y;
-      const scale = 1 - Math.abs(clamped) * 0.12;
+  const handleMouseDown = (e) => {
+    isDown.current = true;
+    setDragging(true);
+    startX.current = e.pageX;
+    scrollStart.current = trackRef.current.scrollLeft;
+  };
 
-      slideEl.style.transform = `rotate(${rotate}deg) translateY(${translateY}px) scale(${scale})`;
-      slideEl.style.transition = "transform 0.3s ease";
-      slideEl.style.zIndex = 100 - Math.abs(Math.round(clamped * 10));
-    });
+  const stopDrag = () => {
+    isDown.current = false;
+    setDragging(false);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDown.current) return;
+    e.preventDefault();
+    const walk = e.pageX - startX.current;
+    trackRef.current.scrollLeft = scrollStart.current - walk;
   };
 
   useEffect(() => {
-    if (swiperRef.current) {
-      applyArcTransform(swiperRef.current);
+    const track = trackRef.current;
+    if (!track) return;
+    const middleIndex = Math.floor(chairs.length / 2);
+    const middleCard = track.children[middleIndex];
+    if (middleCard) {
+      const trackCenter = track.clientWidth / 2;
+      const cardCenter = middleCard.offsetLeft + middleCard.clientWidth / 2;
+      track.scrollLeft = cardCenter - trackCenter;
     }
   }, []);
 
+  // 3. دالة معالجة الضغط مع الحماية
+  const handleViewAllClick = () => {
+    if (isAuthenticated) {
+      navigate("/offers");
+    } else {
+      // التوجيه لصفحة التسجيل وتمرير مسار العروض كـ state للعودة إليه بعد الدخول
+      navigate("/login", { state: { from: "/offers" } });
+    }
+  };
+
   return (
-    <section id="offers"
-      style={{
-        position: "relative",
-        width: "100%",
-        padding: "70px 0 60px",
-        background: "#F4EBDD",
-        overflow: "hidden",
-        fontFamily: "'Poppins', 'Segoe UI', sans-serif",
-        textAlign: "center",
-      }}
-    >
-      {/* الكلمة الشفافة بالخلفية */}
-      <h1
-        style={{
-          position: "absolute",
-          top: "-10px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          fontSize: "clamp(80px, 14vw, 220px)",
-          fontWeight: 800,
-          color: "#E8C79A",
-          opacity: 0.35,
-          margin: 0,
-          letterSpacing: "4px",
-          userSelect: "none",
-          pointerEvents: "none",
-          whiteSpace: "nowrap",
-        }}
-      >
-        Offers
-      </h1>
+    <section id={id} className="ellipse-section">
+      <style>{`
+        .ellipse-section {
+          padding: 0;
+          margin: 0;
+          position: relative;
+          background: var(--color-page);
+        }
 
-      {/* العنوان الأساسي */}
-      <h2
-        style={{
-          position: "relative",
-          fontSize: "clamp(28px, 4vw, 44px)",
-          fontWeight: 800,
-          color: "#D98E3D",
-          margin: "40px 0 60px",
-          zIndex: 2,
-        }}
-      >
-        Offers
-      </h2>
+        .ellipse-section .container {
+          max-width: 1320px;
+          margin: 0 auto;
+          padding: 0 16px;
+        }
 
-      {/* السلايدر */}
-      <Swiper
-        modules={[Navigation]}
-        onSwiper={(swiper) => {
-          swiperRef.current = swiper;
-        }}
-        onInit={(swiper) => applyArcTransform(swiper)}
-        onProgress={(swiper) => applyArcTransform(swiper)}
-        onSetTransition={(swiper, duration) => {
-          swiper.slides.forEach((slideEl) => {
-            slideEl.style.transition = `transform ${duration}ms ease`;
-          });
-        }}
-        onResize={(swiper) => applyArcTransform(swiper)}
-        watchSlidesProgress={true}
-        centeredSlides={true}
-        slidesPerView={"auto"}
-        spaceBetween={20}
-        navigation={{
-          prevEl: prevRef.current,
-          nextEl: nextRef.current,
-        }}
-        onBeforeInit={(swiper) => {
-          swiper.params.navigation.prevEl = prevRef.current;
-          swiper.params.navigation.nextEl = nextRef.current;
-        }}
-        style={{ padding: "40px 0 20px", overflow: "visible" }}
-      >
-        {products.map((p, i) => (
-          <SwiperSlide
-            key={i}
-            style={{
-              width: "310px",
-              height: "300px",
-              transformOrigin: "center bottom",
-            }}
-          >
-            <div
-              style={{
-                position: "relative",
-                width: "100%",
-                height: "100%",
-                borderRadius: "16px",
-                overflow: "hidden",
-                boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
-              }}
-            >
-              {/* شارة الخصم */}
-              <span
-                style={{
-                  position: "absolute",
-                  top: "14px",
-                  left: "0",
-                  background: "#E4341F",
-                  color: "#fff",
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  padding: "5px 12px",
-                  borderRadius: "0 20px 20px 0",
-                  zIndex: 3,
-                }}
-              >
-                Discount 10%
-              </span>
+        .ellipse-section .title-wrapper {
+          position: relative;
+          text-align: center;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
 
-              <img
-                src={p.img}
-                alt=""
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                  pointerEvents: "none",
-                }}
-              />
+        .ellipse-section .bg-title {
+          position: absolute;
+          top: -160px;
+          font-size: 180px;
+          font-weight: bold;
+          color: rgba(213, 140, 56, 0.25);
+          filter: blur(4px);
+          z-index: 0;
+          margin: 0;
+          user-select: none;
+          white-space: nowrap;
+          letter-spacing: 10px;
+        }
+
+        .ellipse-section .main-title {
+          position: relative;
+          z-index: 2;
+          font-size: 50px;
+          font-weight: bold;
+          color: var(--color-orange);
+          margin: 0;
+          margin-top: -60px;
+          letter-spacing: 6px;
+        }
+
+        .products-section {
+          width: 100%;
+          margin: 0 auto;
+          margin-top: 90px;
+        }
+
+        .ellipse-section .track {
+          display: flex;
+          gap: 24px;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          scroll-behavior: smooth;
+          cursor: grab;
+          user-select: none;
+          padding: 10px calc(50% - 160px);
+          scrollbar-width: none;
+        }
+
+        .ellipse-section .track.dragging {
+          cursor: grabbing;
+          scroll-snap-type: none;
+          scroll-behavior: auto;
+        }
+
+        .ellipse-section .track::-webkit-scrollbar {
+          display: none;
+        }
+
+        .ellipse-section .ca {
+          flex: 0 0 auto;
+          width: 320px;
+          scroll-snap-align: center;
+          scroll-snap-stop: always;
+        }
+
+        .ellipse-section .card {
+          width: 100%;
+          overflow: hidden;
+          border-radius: 12px;
+          border: 1px solid transparent;
+          pointer-events: none;
+        }
+
+        .ellipse-section .card img {
+          object-fit: cover;
+          object-position: center 130%;
+          width: 100%;
+          height: 300px;
+          display: block;
+          transition: transform 0.2s ease-in-out;
+        }
+
+        .ellipse-section .card:hover {
+          border-color: #f3e5ab;
+          box-shadow:
+            0 12px 28px rgba(212, 175, 55, 0.3),
+            0 4px 10px rgb(0, 0, 0);
+        }
+
+        .ellipse-section .card:hover img {
+          transform: scale(1.1);
+        }
+
+        .ellipse-bottom {
+          background: var(--color-page);
+          height: 175px;
+          position: relative;
+          top: 150px;
+          clip-path: ellipse(65% 100% at 50% 0%);
+          z-index: 1;
+        }
+
+        .ellipse-section .ellipse-top {
+          background: var(--color-page);
+          height: 152px;
+          position: relative;
+          bottom: 100px;
+          clip-path: ellipse(67% 100% at 50% 100%);
+        }
+
+        .ellipse-section .view-all-container {
+          display: flex;
+          justify-content: center;
+          margin-top: -170px;
+          margin-bottom: 0px; 
+          padding-bottom: 80px; 
+          position: relative;
+          z-index: 2;
+          background: var(--color-page);
+        }
+
+        .ellipse-section .view-all-btn {
+          appearance: button;
+          align-self: flex-start;
+          border-radius: calc(infinity * 1px);
+          background-color: var(--color-orange);
+          padding-inline: calc(0.25rem * 8);
+          padding-block: calc(0.25rem * 3);
+          font-size: var(--text-base, 1rem);
+          font-weight: var(--font-weight-semibold, 600);
+          color: var(--color-white, #fff);
+          border: none;
+          cursor: pointer;
+          box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+          transition-property: all;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 300ms;
+          padding: 12px 150px; 
+          font-size: 21px;
+        }
+
+        .ellipse-section .view-all-btn:hover {
+          filter: brightness(0.9);
+          transform: translateY(-2px);
+          box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+        }
+
+        @media (min-width: 768px) and (max-width: 1200px) {
+          .ellipse-bottom {
+            background: var(--color-page);
+            height: 190px;
+            position: relative;
+            top: 49px;
+            clip-path: ellipse(79% 100% at 50% 0%);
+            z-index: 1;
+          }
+          .ellipse-section .ellipse-top {
+            background: var(--color-page);
+            height: 100px;
+            position: relative;
+            bottom: 60px;
+            clip-path: ellipse(70% 100% at 50% 100%);
+          }
+          .ellipse-section .ca {
+            width: 320px;
+          }
+          .ellipse-section .track {
+            padding: 10px calc(50% - 160px);
+          }
+          .ellipse-section .bg-title {
+            font-size: 90px;
+            top: -40px;
+            letter-spacing: 4px;
+          }
+          .ellipse-section .main-title {
+            font-size: 34px;
+            margin-top: -20px;
+          }
+          .ellipse-section .view-all-btn {
+            padding: 12px 90px;
+            font-size: 19px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .ellipse-section {
+            padding: 70px 0;
+          }
+          .ellipse-section .bg-title {
+            font-size: 55px;
+            top: -18px;
+            letter-spacing: 2px;
+            filter: blur(6px);
+          }
+          .ellipse-section .main-title {
+            font-size: 26px;
+            margin-top: -8px;
+            letter-spacing: 3px;
+          }
+          .ellipse-section .ca {
+            width: 260px;
+          }
+          .ellipse-section .card img {
+            height: 250px;
+            object-position: center 35%;
+          }
+          .ellipse-section .track {
+            padding: 10px calc(50% - 130px);
+            gap: 16px;
+          }
+          .ellipse-section .ellipse-top {
+            display: none;
+          }
+          .ellipse-section .ellipse-bottom {
+            display: none;
+          }
+          .ellipse-section .view-all-container {
+            margin-top: 30px;
+            padding-bottom: 30px;
+          }
+          .ellipse-section .view-all-btn {
+            padding: 12px 60px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .ellipse-section .bg-title {
+            font-size: 40px;
+            top: -10px;
+            letter-spacing: 2px;
+          }
+          .ellipse-section .main-title {
+            font-size: 18px;
+            margin-top: -4px;
+          }
+          .ellipse-section .ca {
+            width: 220px;
+          }
+          .ellipse-section .card img {
+            height: 210px;
+          }
+          .ellipse-section .track {
+            padding: 10px calc(50% - 110px);
+            gap: 12px;
+          }
+          .ellipse-section .view-all-btn {
+            padding: 10px 40px;
+            font-size: 16px;
+          }
+        }
+      `}</style>
+
+      <div className="ellipse-bottom">
+        <div className="container title-wrapper">
+          <h2 className="bg-title">Offers</h2>
+          <span className="main-title">Offers</span>
+        </div>
+      </div>
+
+      <div className="products-section">
+        <div
+          className={`track ${dragging ? "dragging" : ""}`}
+          ref={trackRef}
+          onMouseDown={handleMouseDown}
+          onMouseLeave={stopDrag}
+          onMouseUp={stopDrag}
+          onMouseMove={handleMouseMove}
+        >
+          {chairs.map((chair) => (
+            <div className="ca" key={chair.id}>
+              <div className="card">
+                <img src={chair.src} alt={chair.alt} draggable="false" />
+              </div>
             </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
+          ))}
+        </div>
+      </div>
 
-      {/* زر عرض الكل */}
-      <button
-        style={{
-          marginTop: "50px",
-          background: "#D98E3D",
-          color: "#fff",
-          fontWeight: 700,
-          fontSize: "18px",
-          border: "none",
-          borderRadius: "30px",
-          padding: "16px 60px",
-          cursor: "pointer",
-          boxShadow: "0 8px 20px rgba(217,142,61,0.35)",
-        }}
-      >
-        View All
-      </button>
+      <div className="ellipse-top"></div>
 
-      {/* أزرار التنقل */}
-      <div
-        style={{
-          marginTop: "20px",
-          display: "flex",
-          justifyContent: "center",
-          gap: "2px",
-        }}
-      >
-        <button ref={prevRef} style={navBtnStyle("left")} aria-label="previous">
-          ‹
-        </button>
-        <button ref={nextRef} style={navBtnStyle("right")} aria-label="next">
-          ›
+      <div className="view-all-container">
+        {/* 4. ربط حدث الضغط بالدالة الجديدة */}
+        <button className="view-all-btn" onClick={handleViewAllClick}>
+          View All
         </button>
       </div>
     </section>
   );
 }
-
-const navBtnStyle = (side) => ({
-  width: "44px",
-  height: "40px",
-  background: "#2B2B2B",
-  color: "#fff",
-  border: "none",
-  fontSize: "20px",
-  cursor: "pointer",
-  borderRadius: side === "left" ? "8px 0 0 8px" : "0 8px 8px 0",
-});

@@ -1,87 +1,207 @@
 import React, { useState } from "react";
-import {
-  Star,
-  Heart,
-  ShoppingCart,
-  SlidersHorizontal,
-  CheckCircle2,
-} from "lucide-react";
+import { SlidersHorizontal, CheckCircle2 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
+import ProductCard from "@/components/common/ProductCard";
 
-// استيراد صور المنتجات
+// استيراد صور المنتجات العادية
 import chairImg1 from "@/assets/chair1.png";
 import chairImg2 from "@/assets/chair2.png";
 import sofaImg from "@/assets/sofa.png";
 
-// بيانات المنتجات العينة
+// استيراد صور الكرسي العينة (تتغير حسَب اللون)
+import tealChairImg from "@/assets/chair2.png";
+import grayChairImg from "@/assets/gray-chair1.png";
+import orangeChairImg from "@/assets/orang-chair2.png";
+
 const productsData = [
+  // 1. المنتج العينة
   {
-    id: 1,
+    id: "sample-chair-1",
+    originalId: "sample-chair-1",
     name: "Nordic OAK Chair",
+    title: "Nordic OAK Chair",
+    subtitle: "Emerald Green / Linen",
     material: "Emerald Green / Linen",
     price: 1250,
-    rating: 4.9,
-    category: "Sofas",
-    condition: "Excellent Condition",
-    usedDuration: "Used 1 Month",
-    image: chairImg1,
-    colors: ["#8B5E3C", "#6B8E93", "#2C5E62"],
-  },
-  {
-    id: 2,
-    name: "Nordic OAK Chair",
-    material: "Emerald Green / Linen",
-    price: 1250,
-    rating: 4.9,
-    category: "Sofas",
-    condition: "Good Condition",
-    usedDuration: "Used 15 Days",
-    image: chairImg2,
-    colors: ["#8B5E3C", "#6B8E93", "#2C5E62"],
-  },
-  {
-    id: 3,
-    name: "Nordic OAK Chair",
-    material: "Emerald Green / Linen",
-    price: 1250,
-    rating: 4.9,
-    category: "Sofas",
-    condition: "Fair Condition",
-    usedDuration: "Used 2 Years",
-    image: sofaImg,
-    colors: ["#8B5E3C", "#6B8E93", "#2C5E62"],
-  },
-  {
-    id: 4,
-    name: "Nordic OAK Chair",
-    material: "Emerald Green / Linen",
-    price: 1250,
+    oldPrice: 1500,
+    discount: "16% OFF",
     rating: 4.9,
     category: "Chairs",
     condition: "Excellent Condition",
-    usedDuration: "Used 2 Years",
+    usedDuration: "Used 1 Month",
+    image: tealChairImg,
+    colors: [
+      { name: "Teal", hex: "#1D8B96", image: tealChairImg },
+      { name: "Gray", hex: "#A8B2C1", image: grayChairImg },
+      { name: "Orange", hex: "#C77D24", image: orangeChairImg },
+    ],
+  },
+
+  // 2. كراسي إضافية (Chairs)
+  {
+    id: "chair-2",
+    originalId: "chair-2",
+    name: "Modern Accent Chair",
+    title: "Modern Accent Chair",
+    subtitle: "Velvet / Metal Frame",
+    material: "Velvet / Metal Frame",
+    price: 850,
+    rating: 4.7,
+    category: "Chairs",
+    condition: "Good Condition",
+    usedDuration: "Used 6 Months",
     image: chairImg1,
-    colors: ["#8B5E3C", "#6B8E93", "#2C5E62"],
+    colors: [
+      { name: "Teal", hex: "#6B8E93", image: chairImg1 },
+      { name: "Brown", hex: "#8B5E3C", image: chairImg1 },
+      { name: "Dark Teal", hex: "#2C5E62", image: chairImg1 },
+    ],
+  },
+  {
+    id: "chair-3",
+    originalId: "chair-3",
+    name: "Minimalist Dining Chair",
+    title: "Minimalist Dining Chair",
+    subtitle: "Natural Wood / Fabric",
+    material: "Natural Wood / Fabric",
+    price: 420,
+    rating: 4.6,
+    category: "Chairs",
+    condition: "Fair Condition",
+    usedDuration: "Used 1 Year",
+    image: chairImg2,
+    colors: [
+      { name: "Brown", hex: "#8B5E3C", image: chairImg2 },
+      { name: "Dark Teal", hex: "#2C5E62", image: chairImg2 },
+    ],
+  },
+
+  // 3. أريكة / كنبات (Sofas)
+  {
+    id: "sofa-4",
+    originalId: "sofa-4",
+    name: "Luxury Velvet Sofa",
+    title: "Luxury Velvet Sofa",
+    subtitle: "Dark Teal / Wooden Legs",
+    material: "Dark Teal / Wooden Legs",
+    price: 2400,
+    oldPrice: 2800,
+    discount: "14% OFF",
+    rating: 4.8,
+    category: "Sofas",
+    condition: "Excellent Condition",
+    usedDuration: "Used 2 Months",
+    image: sofaImg,
+    colors: [
+      { name: "Teal", hex: "#1B6D77", image: sofaImg },
+      { name: "Dark Teal", hex: "#2C5E62", image: sofaImg },
+      { name: "Gray", hex: "#A8B2C1", image: sofaImg },
+    ],
+  },
+  {
+    id: "sofa-5",
+    originalId: "sofa-5",
+    name: "Modern Corner Sofa",
+    title: "Modern Corner Sofa",
+    subtitle: "Grey Fabric / Modular",
+    material: "Grey Fabric / Modular",
+    price: 1850,
+    rating: 4.6,
+    category: "Sofas",
+    condition: "Good Condition",
+    usedDuration: "Used 1 Year",
+    image: sofaImg,
+    colors: [
+      { name: "Gray", hex: "#A8B2C1", image: sofaImg },
+      { name: "Teal", hex: "#6B8E93", image: sofaImg },
+    ],
+  },
+  {
+    id: "sofa-6",
+    originalId: "sofa-6",
+    name: "Classic Living Sofa",
+    title: "Classic Living Sofa",
+    subtitle: "Beige / Cotton Blend",
+    material: "Beige / Cotton Blend",
+    price: 1100,
+    rating: 4.4,
+    category: "Sofas",
+    condition: "Fair Condition",
+    usedDuration: "Used 3 Years",
+    image: sofaImg,
+    colors: [
+      { name: "Brown", hex: "#8B5E3C", image: sofaImg },
+      { name: "Orange", hex: "#C77D24", image: sofaImg },
+    ],
+  },
+
+  // 4. أسرة (Beds)
+  {
+    id: "bed-7",
+    originalId: "bed-7",
+    name: "King Size Wooden Bed",
+    title: "King Size Wooden Bed",
+    subtitle: "Solid Oak / Padded Headboard",
+    material: "Solid Oak / Padded Headboard",
+    price: 3100,
+    rating: 4.9,
+    category: "Beds",
+    condition: "Excellent Condition",
+    usedDuration: "Used 3 Months",
+    image: chairImg2,
+    colors: [
+      { name: "Brown", hex: "#8B5E3C", image: chairImg2 },
+      { name: "Gray", hex: "#A8B2C1", image: chairImg2 },
+    ],
+  },
+  {
+    id: "bed-8",
+    originalId: "bed-8",
+    name: "Modern Storage Bed",
+    title: "Modern Storage Bed",
+    subtitle: "Queen Size / Linen Fabric",
+    material: "Queen Size / Linen Fabric",
+    price: 2200,
+    rating: 4.7,
+    category: "Beds",
+    condition: "Good Condition",
+    usedDuration: "Used 8 Months",
+    image: chairImg1,
+    colors: [
+      { name: "Dark Teal", hex: "#2C5E62", image: chairImg1 },
+      { name: "Teal", hex: "#1D8B96", image: chairImg1 },
+    ],
+  },
+  {
+    id: "bed-9",
+    originalId: "bed-9",
+    name: "Single Minimalist BedFrame",
+    title: "Single Minimalist BedFrame",
+    subtitle: "Black Steel / Metal Slats",
+    material: "Black Steel / Metal Slats",
+    price: 750,
+    rating: 4.5,
+    category: "Beds",
+    condition: "Fair Condition",
+    usedDuration: "Used 2 Years",
+    image: sofaImg,
+    colors: [
+      { name: "Gray", hex: "#A8B2C1", image: sofaImg },
+      { name: "Brown", hex: "#8B5E3C", image: sofaImg },
+    ],
   },
 ];
 
 export default function FurnitureProducts() {
   const [filterBy, setFilterBy] = useState("Category");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [favorites, setFavorites] = useState([]);
-
-  const toggleFavorite = (id) => {
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-    );
-  };
 
   const getGroupedProducts = () => {
     if (filterBy === "Category") {
       const categories = ["Sofas", "Chairs", "Beds"];
       return categories.map((cat) => ({
         title: cat,
-        items: productsData,
+        items: productsData.filter((item) => item.category === cat),
       }));
     } else if (filterBy === "Condition") {
       const conditions = [
@@ -91,7 +211,7 @@ export default function FurnitureProducts() {
       ];
       return conditions.map((cond) => ({
         title: cond,
-        items: productsData,
+        items: productsData.filter((item) => item.condition === cond),
       }));
     } else {
       return [
@@ -107,11 +227,9 @@ export default function FurnitureProducts() {
 
   return (
     <div className="bg-[#F8F6F0] min-h-screen flex flex-col pb-16">
-      {/* Navbar */}
       <Navbar />
 
       <main className="max-w-[1250px] mx-auto w-full px-6 pt-8 flex-1">
-        {/* Header & Filter Button */}
         <div className="flex items-center justify-between mb-8 relative">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-[#1B6D77] mb-1">
@@ -122,16 +240,18 @@ export default function FurnitureProducts() {
             </p>
           </div>
 
-          {/* Filter Toggle Button */}
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="p-2.5 bg-[#1B6D77] text-white rounded-xl hover:bg-[#15555d] transition-all flex items-center justify-center cursor-pointer shadow-md"
+            className={`p-2.5 rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-md ${
+              isFilterOpen
+                ? "bg-[#1B6D77] text-white"
+                : "bg-transparent text-[#1B6D77] hover:bg-[#1B6D77] hover:text-white"
+            }`}
             title="Filter options"
           >
             <SlidersHorizontal size={20} />
           </button>
 
-          {/* Filter Menu Popup */}
           {isFilterOpen && (
             <div className="absolute right-0 top-14 z-50 w-64 bg-[#F5ECE0] border border-[#E3D4C1] rounded-2xl p-4 shadow-xl">
               <h3 className="font-bold text-black text-base mb-3">
@@ -148,7 +268,7 @@ export default function FurnitureProducts() {
                     }}
                     className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl font-medium transition-all text-sm cursor-pointer ${
                       filterBy === type
-                        ? "bg-white text-[#1B6D77] shadow-xs font-bold"
+                        ? "bg-white text-[#1B6D77] shadow-sm font-bold"
                         : "bg-white/80 text-gray-700 hover:bg-white"
                     }`}
                   >
@@ -166,7 +286,6 @@ export default function FurnitureProducts() {
           )}
         </div>
 
-        {/* Display Sections */}
         <div className="space-y-12">
           {groupedData.map((group, sectionIndex) => (
             <div key={sectionIndex}>
@@ -174,83 +293,9 @@ export default function FurnitureProducts() {
                 {group.title}
               </h2>
 
-              {/* Grid Layout */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-start">
-                {group.items.slice(0, 3).map((product, idx) => (
-                  <div
-                    key={`${product.id}-${idx}`}
-                    className="flex flex-col items-center"
-                  >
-                    {/* Card Container */}
-                    <div className="bg-white rounded-[28px] overflow-hidden shadow-md border border-gray-100 w-full relative group">
-                      {/* Image Box */}
-                      <div className="relative h-64 sm:h-72 w-full overflow-hidden">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-
-                        {/* Rating Badge */}
-                        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-full flex items-center gap-1 text-xs font-bold text-gray-800 shadow-xs">
-                          <Star
-                            size={14}
-                            className="fill-amber-400 text-amber-400"
-                          />
-                          <span>{product.rating}</span>
-                        </div>
-
-                        {/* Favorite Button */}
-                        <button
-                          onClick={() => toggleFavorite(product.id)}
-                          className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs p-2 rounded-full text-gray-600 hover:text-red-500 transition-colors shadow-xs cursor-pointer"
-                        >
-                          <Heart
-                            size={18}
-                            className={
-                              favorites.includes(product.id)
-                                ? "fill-red-500 text-red-500"
-                                : ""
-                            }
-                          />
-                        </button>
-                      </div>
-
-                      {/* Card Content */}
-                      <div className="p-5">
-                        <h3 className="text-lg font-bold text-gray-900 mb-0.5">
-                          {product.name}
-                        </h3>
-                        <p className="text-xs text-gray-500 mb-3">
-                          {product.material}
-                        </p>
-
-                        <div className="flex items-center justify-between">
-                          <span className="text-xl font-bold text-gray-900">
-                            ${product.price.toLocaleString()}
-                          </span>
-
-                          <button
-                            type="button"
-                            className="text-[#1B6D77] hover:text-[#135158] transition-colors p-2 rounded-full hover:bg-gray-100 cursor-pointer"
-                          >
-                            <ShoppingCart size={22} />
-                          </button>
-                        </div>
-
-                        {/* Color Options */}
-                        <div className="flex items-center gap-2 mt-3">
-                          {product.colors.map((color, cIdx) => (
-                            <span
-                              key={cIdx}
-                              className="w-4 h-4 rounded-full border border-gray-300 inline-block shadow-xs"
-                              style={{ backgroundColor: color }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                {group.items.map((product) => (
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             </div>

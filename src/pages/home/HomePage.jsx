@@ -21,24 +21,22 @@ export default function HomePage() {
   const { user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // دالة الحماية: تستقبل المسار وتقرر إما تفتح الصفحة أو تظهر المودال
+  // دالة الحماية: تستقبل المسار وتفحص حالة التسجيل
   const handleProtectedAction = (targetPath) => {
-    // if (user) {
-    //   navigate(targetPath); // مسجل -> يروح للصفحة
-    // } else {
-    //   window.scrollTo({ top: 0, behavior: "smooth" });
-    //   setShowAuthModal(true); // غير مسجل -> يظهر المودال
-    // }
-    navigate(targetPath);
+    // navigate(targetPath);
+    if (user) {
+      navigate(targetPath); // مسجل دخول -> ينقله للصفحة مباشرة
+    } else {
+      setShowAuthModal(true); // غير مسجل -> يظهر المودال فوراً
+    }
   };
 
   return (
     <main className="min-h-screen bg-page">
-      
       {/* 1. المودال يظهر عند الحاجة */}
-      <AuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
       />
 
       {/* 2. السكشن الأول */}
@@ -54,7 +52,7 @@ export default function HomePage() {
       <SmartAISection onNavigate={handleProtectedAction} />
       <CustomerReviewsSection />
       <CallToAction onNavigate={handleProtectedAction} />
-      
+
       <Footer />
     </main>
   );
