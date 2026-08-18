@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ChevronRight } from "lucide-react";
 
+// أيقونات الفئات
 import sofasIcon from "@/assets/sofas1.png";
 import lampsIcon from "@/assets/lamps.png";
 import chairsIcon from "@/assets/chairs.png";
@@ -8,64 +9,114 @@ import bedsIcon from "@/assets/beds.png";
 import bathroomIcon from "@/assets/bathroom.png";
 import kitchenIcon from "@/assets/kitchen.png";
 
-// استيراد صور المنتج السامبل الرئيسي
+// صور الكراسي للسامبل الرئيسي
 import teal1 from "@/assets/chair2.png";
 import gray1 from "@/assets/gray-chair1.png";
 import orange1 from "@/assets/orang-chair2.png";
 
-// استخدام ProductCard المستورد من مشروعك لضمان مطابقة التصميم
+/* =========================================================
+   1. استيراد صور المنتجات الخاصة بكِ من مجلد assets:
+   ========================================================= */
+import sofa0 from "@/assets/sofa0.jpg";
+import sofa1 from "@/assets/sofa1.jpg";
+import sofa2 from "@/assets/sofa2.jpg";
+
+import lamp0 from "@/assets/lamp0.jpg";
+import lamp1 from "@/assets/lamp1.jpg";
+import lamp2 from "@/assets/lamp2.jpg";
+
+import chair0 from "@/assets/chair0.jpg";
+import chair1 from "@/assets/chair1.jpg";
+
+import bed0 from "@/assets/bed0.jpg";
+import bed1 from "@/assets/bed1.jpg";
+import bed2 from "@/assets/bed2.jpg";
+
+import bath0 from "@/assets/bath0.jpg";
+import bath1 from "@/assets/bath1.jpg";
+import bath2 from "@/assets/bath2.jpg";
+
+import kit0 from "@/assets/kit0.jpg";
+import kit1 from "@/assets/kit1.jpg";
+import kit2 from "@/assets/kit2.jpg";
+
+// استيراد ProductCard
 import ProductCard from "@/components/common/ProductCard";
 
+/* =========================================================
+   2. قائمة الفئات والصورة الرئيسية المعروضة بالبنر لكل فئة:
+   ========================================================= */
 const categories = [
   {
     key: "sofas",
     label: "Sofas",
     icon: sofasIcon,
-    img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=450&fit=crop",
+    img: sofa0 /* حطي صورة البنر الرئيسية للفئة هان */,
   },
   {
     key: "lamps",
     label: "Lamps",
     icon: lampsIcon,
-    img: "https://images.unsplash.com/photo-1507473885765-e6ed0579adf8?w=600&h=450&fit=crop",
+    img: lamp0 /* حطي صورة البنر الرئيسية للفئة هان */,
   },
   {
     key: "chairs",
     label: "Chairs",
     icon: chairsIcon,
-    img: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=600&h=450&fit=crop",
+    img: teal1 /* حطي صورة البنر الرئيسية للفئة هان */,
   },
   {
     key: "beds",
     label: "Beds",
     icon: bedsIcon,
-    img: "https://images.unsplash.com/photo-1505693416388-b5d4f03e03e6?w=600&h=450&fit=crop",
+    img: bed0 /* حطي صورة البنر الرئيسية للفئة هان */,
   },
   {
     key: "bathroom",
     label: "Bathroom",
     icon: bathroomIcon,
-    img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&h=450&fit=crop",
+    img: bath0 /* حطي صورة البنر الرئيسية للفئة هان */,
   },
   {
     key: "kitchen",
     label: "Kitchen",
     icon: kitchenIcon,
-    img: "https://images.unsplash.com/photo-1556911220-e7189d5bcd24?w=600&h=450&fit=crop",
+    img: kit0 /* حطي صورة البنر الرئيسية للفئة هان */,
   },
 ];
 
-// --- تعريف منتج السامبل الملون في فئة الكراسي ---
+// دالة إنشاء كائن منتج مطابق لبنية صفحة الفئات
+const createDummyProduct = (id, name, categoryKey, defaultImg) => ({
+  id,
+  originalId: id,
+  categoryKey,
+  name: name || "Nordic OAK Chair",
+  title: name || "Nordic OAK Chair",
+  subtitle: "Emerald Green / Linen",
+  material: "Emerald Green / Linen",
+  price: "$1,250",
+  rating: 4.9,
+  image: defaultImg,
+  colors: [{ name: "Teal", hex: "#1D8B96", image: defaultImg }],
+});
+
+// منتج الكرسي العينة الملون
 const sampleChairProduct = {
   id: "sample-chair-1",
+  originalId: "sample-chair-1",
   categoryKey: "chairs",
   name: "Nordic OAK Chair",
   title: "Nordic OAK Chair",
   subtitle: "Emerald Green / Linen",
+  material: "Emerald Green / Linen",
   price: "$1,250",
-  rating: 4.9,
+  oldPrice: "$1,500",
   discount: true,
-  isSample: true,
+  rating: 4.9,
+  category: "Chairs",
+  condition: "Excellent Condition",
+  usedDuration: "Used 1 Month",
+  image: teal1,
   colors: [
     { name: "Teal", hex: "#1D8B96", image: teal1 },
     { name: "Gray", hex: "#A8B2C1", image: gray1 },
@@ -73,221 +124,79 @@ const sampleChairProduct = {
   ],
 };
 
-// --- قاعدة بيانات المنتجات (3 منتجات لكل فئة) ---
+/* =========================================================
+   3. جلب أول 3 منتجات فقط لكل فئة (نفس بيانات صفحة الفئات):
+   ========================================================= */
 const productsByCategory = {
   sofas: [
-    {
-      id: "sofa-1",
-      categoryKey: "sofas",
-      name: "Serene Arc Sofa",
-      title: "Serene Arc Sofa",
-      subtitle: "Emerald Green / Linen",
-      price: "$820",
-      rating: 4.9,
-      image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
-    {
-      id: "sofa-2",
-      categoryKey: "sofas",
-      name: "Modern Velvet Couch",
-      title: "Modern Velvet Couch",
-      subtitle: "Royal Blue / Velvet",
-      price: "$1,150",
-      rating: 4.8,
-      image: "https://images.unsplash.com/photo-1550581190-9c1c08221252?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
-    {
-      id: "sofa-3",
-      categoryKey: "sofas",
-      name: "Minimalist Fabric Sofa",
-      title: "Minimalist Fabric Sofa",
-      subtitle: "Warm Beige / Cotton",
-      price: "$950",
-      rating: 4.7,
-      image:
-        "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
+    createDummyProduct("sofa-0", "Modern Sofa", "sofas", sofa0 /* الصورة 1 */),
+    createDummyProduct("sofa-1", "Linen Sofa", "sofas", sofa1 /* الصورة 2 */),
+    createDummyProduct("sofa-2", "Luxury Sofa", "sofas", sofa2 /* الصورة 3 */),
   ],
   lamps: [
-    {
-      id: "lamp-1",
-      categoryKey: "lamps",
-      name: "Nordic Desk Lamp",
-      title: "Nordic Desk Lamp",
-      subtitle: "Matte Black / Wood",
-      price: "$180",
-      rating: 4.8,
-      image:
-        "https://images.unsplash.com/photo-1507473885765-e6ed0579adf8?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
-    {
-      id: "lamp-2",
-      categoryKey: "lamps",
-      name: "Standing Arc Lamp",
-      title: "Standing Arc Lamp",
-      subtitle: "Brushed Brass / Metal",
-      price: "$290",
-      rating: 4.9,
-      image:
-        "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
-    {
-      id: "lamp-3",
-      categoryKey: "lamps",
-      name: "Pendant Ceiling Light",
-      title: "Pendant Ceiling Light",
-      subtitle: "Smoked Glass / Steel",
-      price: "$210",
-      rating: 4.6,
-      image:
-        "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
+    createDummyProduct("lamp-0", "Table Lamp", "lamps", lamp0 /* الصورة 1 */),
+    createDummyProduct("lamp-1", "Floor Lamp", "lamps", lamp1 /* الصورة 2 */),
+    createDummyProduct("lamp-2", "Desk Lamp", "lamps", lamp2 /* الصورة 3 */),
   ],
   chairs: [
-    sampleChairProduct, // المنتج السامبل يظهر هنا ضمن فئة الكراسي
-    {
-      id: "chair-2",
-      categoryKey: "chairs",
-      name: "Ergonomic Lounge Chair",
-      title: "Ergonomic Lounge Chair",
-      subtitle: "Charcoal Leather",
-      price: "$680",
-      rating: 4.8,
-      image:
-        "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
-    {
-      id: "chair-3",
-      categoryKey: "chairs",
-      name: "Minimalist Dining Chair",
-      title: "Minimalist Dining Chair",
-      subtitle: "Walnut / Cushion",
-      price: "$320",
-      rating: 4.7,
-      image:
-        "https://images.unsplash.com/photo-1503602642458-232111445657?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
+    sampleChairProduct, // المنتج الأول المشترك
+    createDummyProduct(
+      "chair-1",
+      "Office Chair",
+      "chairs",
+      chair0 /* الصورة 2 */,
+    ),
+    createDummyProduct(
+      "chair-2",
+      "Dining Chair",
+      "chairs",
+      chair1 /* الصورة 3 */,
+    ),
   ],
   beds: [
-    {
-      id: "bed-1",
-      categoryKey: "beds",
-      name: "King Upholstered Bed",
-      title: "King Upholstered Bed",
-      subtitle: "Slate Gray / Oak",
-      price: "$1,450",
-      rating: 4.9,
-      image:
-        "https://images.unsplash.com/photo-1505693416388-b5d4f03e03e6?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
-    {
-      id: "bed-2",
-      categoryKey: "beds",
-      name: "Wooden Platform Bed",
-      title: "Wooden Platform Bed",
-      subtitle: "Solid Walnut Frame",
-      price: "$1,200",
-      rating: 4.8,
-      image:
-        "https://images.unsplash.com/photo-1540518614846-7ede433c5163?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
-    {
-      id: "bed-3",
-      categoryKey: "beds",
-      name: "Cozy Tufted Bed",
-      title: "Cozy Tufted Bed",
-      subtitle: "Cream Fabric Frame",
-      price: "$1,350",
-      rating: 4.7,
-      image:
-        "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
+    createDummyProduct("bed-0", "King Bed", "beds", bed0 /* الصورة 1 */),
+    createDummyProduct("bed-1", "Queen Bed", "beds", bed1 /* الصورة 2 */),
+    createDummyProduct("bed-2", "Single Bed", "beds", bed2 /* الصورة 3 */),
   ],
   bathroom: [
-    {
-      id: "bath-1",
-      categoryKey: "bathroom",
-      name: "Modern Bathroom Vanity",
-      title: "Modern Bathroom Vanity",
-      subtitle: "Marble Top / Oak",
-      price: "$890",
-      rating: 4.8,
-      image:
-        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
-    {
-      id: "bath-2",
-      categoryKey: "bathroom",
-      name: "Freestanding Soaking Tub",
-      title: "Freestanding Soaking Tub",
-      subtitle: "White Acrylic Finish",
-      price: "$1,600",
-      rating: 4.9,
-      image:
-        "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
-    {
-      id: "bath-3",
-      categoryKey: "bathroom",
-      name: "LED Smart Mirror",
-      title: "LED Smart Mirror",
-      subtitle: "Anti-Fog / Dimmable",
-      price: "$240",
-      rating: 4.7,
-      image:
-        "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
+    createDummyProduct(
+      "bath-0",
+      "Bathroom Cabinet",
+      "bathroom",
+      bath0 /* الصورة 1 */,
+    ),
+    createDummyProduct(
+      "bath-1",
+      "Mirror Cabinet",
+      "bathroom",
+      bath1 /* الصورة 2 */,
+    ),
+    createDummyProduct(
+      "bath-2",
+      "Towel Rack",
+      "bathroom",
+      bath2 /* الصورة 3 */,
+    ),
   ],
   kitchen: [
-    {
-      id: "kitchen-1",
-      categoryKey: "kitchen",
-      name: "Marble Kitchen Island",
-      title: "Marble Kitchen Island",
-      subtitle: "White Marble / Brass",
-      price: "$1,850",
-      rating: 4.9,
-      image: "https://images.unsplash.com/photo-1556911220-e7189d5bcd24?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
-    {
-      id: "kitchen-2",
-      categoryKey: "kitchen",
-      name: "Minimalist Bar Stool",
-      title: "Minimalist Bar Stool",
-      subtitle: "Black Metal / Leather",
-      price: "$190",
-      rating: 4.8,
-      image:
-        "https://images.unsplash.com/photo-1503602642458-232111445657?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
-    {
-      id: "kitchen-3",
-      categoryKey: "kitchen",
-      name: "Wooden Dining Buffet",
-      title: "Wooden Dining Buffet",
-      subtitle: "Solid Oak Cabinet",
-      price: "$980",
-      rating: 4.7,
-      image:
-        "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=600",
-      colors: [{ hex: "#1D8B96" }, { hex: "#A8B2C1" }, { hex: "#C77D24" }],
-    },
+    createDummyProduct(
+      "kitchen-0",
+      "Kitchen Island",
+      "kitchen",
+      kit0 /* الصورة 1 */,
+    ),
+    createDummyProduct(
+      "kitchen-1",
+      "Dining Table",
+      "kitchen",
+      kit1 /* الصورة 2 */,
+    ),
+    createDummyProduct(
+      "kitchen-2",
+      "Kitchen Counter",
+      "kitchen",
+      kit2 /* الصورة 3 */,
+    ),
   ],
 };
 
@@ -319,7 +228,7 @@ export default function CategoriesSection({ onNavigate }) {
   const [activeTab, setActiveTab] = useState("sofas");
   const activeCategoryData = categories.find((cat) => cat.key === activeTab);
 
-  // جلب 3 منتجات خاصة بالفئة النشطة المحددة
+  // جلب أول 3 منتجات خاصة بالفئة النشطة
   const displayedProducts =
     productsByCategory[activeTab] || productsByCategory.sofas;
 

@@ -9,10 +9,12 @@ import {
   CheckCircle2,
   Plus,
   Minus,
+  Phone,
+  MessageSquare,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 
-// استيراد الأيقونات الأربع
+// استيراد الأيقونات والصور
 import sofaIcon from "@/assets/Group 238991.png";
 import curtainIcon from "@/assets/Group 6356131.png";
 import carpetIcon from "@/assets/Group 6356132.png";
@@ -21,7 +23,6 @@ import bedIcon from "@/assets/Group 6356133.png";
 export default function CleaningServiceBooking() {
   const navigate = useNavigate();
 
-  // مراجع لحقول التاريخ والوقت لفتحها برمجياً عند النقر على أيقوناتك
   const dateInputRef = useRef(null);
   const timeInputRef = useRef(null);
 
@@ -83,20 +84,78 @@ export default function CleaningServiceBooking() {
     return baseTotal * itemsCount;
   };
 
+  const estimatedPrice = calculatePrice();
+
   // التحقق من صلاحية النموذج لتفعيل الزر
   const isFormValid =
-    location.trim() !== "" &&
-    date !== "" &&
-    time !== "" &&
-    calculatePrice() > 0;
+    location.trim() !== "" && date !== "" && time !== "" && estimatedPrice > 0;
+
+  // --- دالة التأكيد المعدلة: حفظ الإشعار والانتقال المباشر للدفع ---
+  const handleConfirm = () => {
+    if (!isFormValid) return;
+
+    // 1. إنشاء كائن الإشعار الجديد
+    const newNotification = {
+      id: Date.now(),
+      title: "Cleaning Service Confirmed",
+      message: `Your cleaning request for ${location} has been placed successfully! Total: $${estimatedPrice}`,
+      time: "Just now",
+      type: "Services",
+      section: "Today",
+      hasBadge: true,
+    };
+
+    // 2. حفظ الإشعار في localStorage
+    const existingNotifications = JSON.parse(
+      localStorage.getItem("app_notifications") || "[]",
+    );
+    const updatedNotifications = [newNotification, ...existingNotifications];
+    localStorage.setItem(
+      "app_notifications",
+      JSON.stringify(updatedNotifications),
+    );
+
+    // 3. تحديث عداد الإشعارات غير المقروءة
+    const currentCount = parseInt(
+      localStorage.getItem("unread_notifications_count") || "0",
+      10,
+    );
+    localStorage.setItem(
+      "unread_notifications_count",
+      (currentCount + 1).toString(),
+    );
+
+    // 4. إرسال حدث لتحديث الـ Navbar
+    window.dispatchEvent(new Event("notifications_updated"));
+
+    // 5. الانتقال المباشر إلى صفحة الدفع مع إرسال تفاصيل الحجز
+    navigate("/payment", {
+      state: {
+        bookingDetails: {
+          bookingId: "#1259",
+          serviceType: "Cleaning Service",
+          cleaningType,
+          selectedSubServices:
+            cleaningType === "partial"
+              ? selectedSubServices
+              : ["Full Furniture Cleaning"],
+          itemsCount: cleaningType === "partial" ? itemsCount : 1,
+          location,
+          date,
+          time,
+          dirtLevel,
+          notes,
+          price: estimatedPrice,
+        },
+      },
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-[#F6EEE3]">
-      {/* Navbar */}
+    <div className="min-h-screen bg-[#F6EEE3] relative">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-6 py-10">
-        {/* عنوان الصفحة */}
         <h1 className="text-2xl font-bold text-[#1B6D77] mb-8">
           Furniture Cleaning Service
         </h1>
@@ -104,13 +163,14 @@ export default function CleaningServiceBooking() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           {/* الجانب الأيسر: نوع الخدمة واختيار العناصر */}
           <div className="lg:col-span-7 space-y-8">
-            {/* 1. Specify Cleaning Service Type */}
+            {/* Specify Cleaning Service Type */}
             <div>
               <h2 className="text-base font-bold text-[#1B6D77] mb-4">
                 Specify Cleaning Service Type
               </h2>
               <div className="inline-flex p-1 bg-white rounded-2xl shadow-sm border border-gray-100">
                 <button
+                  type="button"
                   onClick={() => setCleaningType("partial")}
                   className={`px-6 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
                     cleaningType === "partial"
@@ -121,6 +181,7 @@ export default function CleaningServiceBooking() {
                   Partial Cleaning
                 </button>
                 <button
+                  type="button"
                   onClick={() => setCleaningType("complete")}
                   className={`px-6 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
                     cleaningType === "complete"
@@ -133,18 +194,17 @@ export default function CleaningServiceBooking() {
               </div>
             </div>
 
-            {/* 2. Choose One Or More Services */}
+            {/* Choose One Or More Services */}
             <div>
               <h2 className="text-base font-bold text-[#1B6D77] mb-4">
                 Choose One Or More Services
               </h2>
 
               {cleaningType === "partial" ? (
-                /* خيارات Partial Cleaning: الأيقونات الأربع المستقلة */
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {subServices.map((service) => {
                     const isSelected = selectedSubServices.includes(
-                      service.id
+                      service.id,
                     );
                     return (
                       <div
@@ -179,7 +239,6 @@ export default function CleaningServiceBooking() {
                   })}
                 </div>
               ) : (
-                /* خيار Complete Cleaning */
                 <div
                   onClick={() => setIsCompleteSelected(!isCompleteSelected)}
                   className={`relative bg-white rounded-2xl p-6 cursor-pointer transition-all border-2 max-w-lg ${
@@ -265,7 +324,6 @@ export default function CleaningServiceBooking() {
                   Cleaning Date & Time
                 </label>
                 <div className="flex-1 flex gap-2">
-                  {/* حقل التاريخ مع إخفاء أيقونة المتصفح وإظهار أيقونتك الصفراء فقط */}
                   <div className="relative flex-1">
                     <input
                       ref={dateInputRef}
@@ -281,7 +339,6 @@ export default function CleaningServiceBooking() {
                     />
                   </div>
 
-                  {/* حقل الوقت مع إخفاء أيقونة المتصفح وإظهار أيقونتك الصفراء فقط */}
                   <div className="relative flex-1">
                     <input
                       ref={timeInputRef}
@@ -299,7 +356,7 @@ export default function CleaningServiceBooking() {
                 </div>
               </div>
 
-              {/* Furniture Items Num (يظهر فقط عند الاختيار الجزئي) */}
+              {/* Furniture Items Num */}
               {cleaningType === "partial" && (
                 <div className="flex items-center justify-between gap-4">
                   <label className="font-semibold text-gray-700 w-1/3">
@@ -380,22 +437,22 @@ export default function CleaningServiceBooking() {
                 Estimated Price :
               </span>
               <span className="text-xl font-bold text-[#1B6D77]">
-                ${calculatePrice()}
+                ${estimatedPrice}
               </span>
             </div>
 
-            {/* Confirm & Pay Button */}
+            {/* Confirm Button */}
             <button
               type="button"
               disabled={!isFormValid}
-              onClick={() => navigate("/payment")}
+              onClick={handleConfirm}
               className={`w-full mt-5 font-bold py-3.5 px-6 rounded-2xl shadow-md transition-all text-sm ${
                 isFormValid
                   ? "bg-[#D58C38] hover:bg-[#c27c2b] text-white cursor-pointer"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
               }`}
             >
-              Confirm & Pay
+              Confirm
             </button>
           </div>
         </div>

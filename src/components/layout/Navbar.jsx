@@ -33,6 +33,32 @@ export default function Navbar({ transparent = false }) {
   const mobileDropdownRef = useRef(null);
   const { favorites } = useFavorites();
 
+  // 👇 إدارة حالة الإشعارات وسماع التغييرات من localStorage والأحداث Custom Event 👇
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const updateNotificationCount = () => {
+    const count = parseInt(
+      localStorage.getItem("unread_notifications_count") || "0",
+      10,
+    );
+    setUnreadCount(count);
+  };
+
+  useEffect(() => {
+    updateNotificationCount();
+    window.addEventListener("notifications_updated", updateNotificationCount);
+    window.addEventListener("storage", updateNotificationCount);
+
+    return () => {
+      window.removeEventListener(
+        "notifications_updated",
+        updateNotificationCount,
+      );
+      window.removeEventListener("storage", updateNotificationCount);
+    };
+  }, []);
+  // 👆 انتهى الجزء الخاص بالإشعارات 👆
+
   const navLinks = [
     { name: "Home", target: "/#hero" },
     { name: "Offers", target: "/#offers" },
@@ -42,10 +68,9 @@ export default function Navbar({ transparent = false }) {
     { name: "Review", target: "/#reviews" },
   ];
 
+  const defaultAvatar =
+    "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
 
-const defaultAvatar = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
-
-  // تم تحديث جلب الصورة والاسم ليأخذوا التحديثات المباشرة من قاعدة البيانات مع الحفاظ على القيم الافتراضية
   const userAvatar =
     user?.avatar ||
     user?.avatar_url ||
@@ -173,9 +198,12 @@ const defaultAvatar = "https://www.gravatar.com/avatar/0000000000000000000000000
                 icon={faBell}
                 className="text-[var(--color-teal)] text-base"
               />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                3
-              </span>
+              {/* شارة الإشعارات الديناميكية */}
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center border border-white animate-pulse">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </Link>
 
             <Link
@@ -376,12 +404,18 @@ const defaultAvatar = "https://www.gravatar.com/avatar/0000000000000000000000000
                 <Link
                   to="/notifications"
                   onClick={handleCloseMenu}
-                  className="w-10 h-10 rounded-full bg-[#FCEADE] shadow-sm flex items-center justify-center text-[var(--color-teal)]"
+                  className="relative w-10 h-10 rounded-full bg-[#FCEADE] shadow-sm flex items-center justify-center text-[var(--color-teal)]"
                 >
                   <FontAwesomeIcon
                     icon={faBell}
                     className="text-[var(--color-teal)] text-base"
                   />
+                  {/* شارة الإشعارات للموبايل */}
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center border border-white animate-pulse">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
                 </Link>
                 <Link
                   to="/favorites"
@@ -417,7 +451,7 @@ const defaultAvatar = "https://www.gravatar.com/avatar/0000000000000000000000000
                     />
                   </button>
 
-                  {/* نفس القائمة المنسدلة في نفس المكان والنمط بدون تغير بتصميمها */}
+                  {/* القائمة المنسدلة */}
                   {dropdownOpen && (
                     <div
                       className="absolute right-0 bottom-12 w-56 bg-[var(--color-page)] rounded-[1.75rem] shadow-2xl overflow-hidden z-50 border border-[#1B6D77]/10 text-left"
