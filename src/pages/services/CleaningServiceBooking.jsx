@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MapPin,
   Calendar,
@@ -18,6 +19,12 @@ import carpetIcon from "@/assets/Group 6356132.png";
 import bedIcon from "@/assets/Group 6356133.png";
 
 export default function CleaningServiceBooking() {
+  const navigate = useNavigate();
+
+  // مراجع لحقول التاريخ والوقت لفتحها برمجياً عند النقر على أيقوناتك
+  const dateInputRef = useRef(null);
+  const timeInputRef = useRef(null);
+
   // نوع الخدمة: Partial Cleaning أو Complete Cleaning
   const [cleaningType, setCleaningType] = useState("partial");
 
@@ -76,6 +83,13 @@ export default function CleaningServiceBooking() {
     return baseTotal * itemsCount;
   };
 
+  // التحقق من صلاحية النموذج لتفعيل الزر
+  const isFormValid =
+    location.trim() !== "" &&
+    date !== "" &&
+    time !== "" &&
+    calculatePrice() > 0;
+
   return (
     <div className="min-h-screen bg-[#F6EEE3]">
       {/* Navbar */}
@@ -129,7 +143,9 @@ export default function CleaningServiceBooking() {
                 /* خيارات Partial Cleaning: الأيقونات الأربع المستقلة */
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {subServices.map((service) => {
-                    const isSelected = selectedSubServices.includes(service.id);
+                    const isSelected = selectedSubServices.includes(
+                      service.id
+                    );
                     return (
                       <div
                         key={service.id}
@@ -163,7 +179,7 @@ export default function CleaningServiceBooking() {
                   })}
                 </div>
               ) : (
-                /* خيار Complete Cleaning: تفاعلي بالكامل مع خيار التحديد */
+                /* خيار Complete Cleaning */
                 <div
                   onClick={() => setIsCompleteSelected(!isCompleteSelected)}
                   className={`relative bg-white rounded-2xl p-6 cursor-pointer transition-all border-2 max-w-lg ${
@@ -172,12 +188,10 @@ export default function CleaningServiceBooking() {
                       : "border-transparent hover:border-gray-200"
                   }`}
                 >
-                  {/* شارة الخصم الحمراء */}
                   <div className="absolute top-0 left-0 bg-[#D92D20] text-white text-[11px] font-bold px-3 py-1 rounded-br-xl rounded-tl-2xl">
                     Discount 10%
                   </div>
 
-                  {/* أيقونة الصح تظهر عند التحديد */}
                   {isCompleteSelected && (
                     <div className="absolute top-3 right-3 text-[#1B6D77]">
                       <CheckCircle2
@@ -251,28 +265,35 @@ export default function CleaningServiceBooking() {
                   Cleaning Date & Time
                 </label>
                 <div className="flex-1 flex gap-2">
+                  {/* حقل التاريخ مع إخفاء أيقونة المتصفح وإظهار أيقونتك الصفراء فقط */}
                   <div className="relative flex-1">
                     <input
+                      ref={dateInputRef}
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="w-full bg-white rounded-xl py-2.5 px-2 pr-7 border border-gray-200 outline-none text-xs"
+                      className="w-full bg-white rounded-xl py-2.5 px-2 pr-7 border border-gray-200 outline-none text-xs cursor-pointer focus:border-[#1B6D77] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full"
                     />
                     <Calendar
                       size={15}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-600/70 pointer-events-none"
+                      onClick={() => dateInputRef.current?.showPicker?.()}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-600/70 cursor-pointer hover:text-[#1B6D77]"
                     />
                   </div>
+
+                  {/* حقل الوقت مع إخفاء أيقونة المتصفح وإظهار أيقونتك الصفراء فقط */}
                   <div className="relative flex-1">
                     <input
+                      ref={timeInputRef}
                       type="time"
                       value={time}
                       onChange={(e) => setTime(e.target.value)}
-                      className="w-full bg-white rounded-xl py-2.5 px-2 pr-7 border border-gray-200 outline-none text-xs"
+                      className="w-full bg-white rounded-xl py-2.5 px-2 pr-7 border border-gray-200 outline-none text-xs cursor-pointer focus:border-[#1B6D77] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full"
                     />
                     <Clock
                       size={15}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-600/70 pointer-events-none"
+                      onClick={() => timeInputRef.current?.showPicker?.()}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-600/70 cursor-pointer hover:text-[#1B6D77]"
                     />
                   </div>
                 </div>
@@ -287,7 +308,9 @@ export default function CleaningServiceBooking() {
                   <div className="flex-1 flex items-center bg-white rounded-xl border border-gray-200 overflow-hidden">
                     <button
                       type="button"
-                      onClick={() => setItemsCount(Math.max(1, itemsCount - 1))}
+                      onClick={() =>
+                        setItemsCount(Math.max(1, itemsCount - 1))
+                      }
                       className="p-2.5 bg-amber-100/60 hover:bg-amber-100 text-amber-800 transition-colors"
                     >
                       <Minus size={14} />
@@ -315,7 +338,7 @@ export default function CleaningServiceBooking() {
                   <select
                     value={dirtLevel}
                     onChange={(e) => setDirtLevel(e.target.value)}
-                    className="w-full bg-white rounded-xl py-2.5 px-3 pr-8 border border-gray-200 outline-none appearance-none text-xs text-gray-700"
+                    className="w-full bg-white rounded-xl py-2.5 px-3 pr-8 border border-gray-200 outline-none appearance-none text-xs text-gray-700 cursor-pointer"
                   >
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
@@ -364,10 +387,15 @@ export default function CleaningServiceBooking() {
             {/* Confirm & Pay Button */}
             <button
               type="button"
-              onClick={() => alert("تم تأكيد الطلب بنجاح!")}
-              className="w-full mt-5 bg-[#D58C38] hover:bg-[#c27c2b] text-white font-bold py-3.5 px-6 rounded-2xl shadow-md transition-all cursor-pointer text-sm"
+              disabled={!isFormValid}
+              onClick={() => navigate("/payment")}
+              className={`w-full mt-5 font-bold py-3.5 px-6 rounded-2xl shadow-md transition-all text-sm ${
+                isFormValid
+                  ? "bg-[#D58C38] hover:bg-[#c27c2b] text-white cursor-pointer"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
+              }`}
             >
-              Confirm& Pay
+              Confirm & Pay
             </button>
           </div>
         </div>

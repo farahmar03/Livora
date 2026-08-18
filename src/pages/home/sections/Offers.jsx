@@ -1,7 +1,4 @@
 import React, { useRef, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-// 1. استيراد هوك التوثيق الخاص بتطبيقك (عدلي المسار حسب المجلد لديك)
-import { useAuth } from "@/context/AuthContext";
 
 import offer1 from "@/assets/offer1.png";
 import offer2 from "@/assets/offer2.png";
@@ -31,12 +28,7 @@ const chairs = [
   { id: 12, alt: "مقعد مفرد 12", src: offer12 },
 ];
 
-export default function Offers({ id = "offers" }) {
-  const navigate = useNavigate();
-
-  // 2. فحص حالة التسجيل (يمكن استبدال isAuthenticated بحسب القيمة المستخدمة في مشروعك مثل user أو token)
-  const { isAuthenticated } = useAuth();
-
+export default function Offers({ id = "offers", onNavigate }) {
   const trackRef = useRef(null);
   const isDown = useRef(false);
   const startX = useRef(0);
@@ -74,13 +66,10 @@ export default function Offers({ id = "offers" }) {
     }
   }, []);
 
-  // 3. دالة معالجة الضغط مع الحماية
+  // ✅ دالة معالجة الضغط مع الحماية (مثل CategoriesSection)
   const handleViewAllClick = () => {
-    if (isAuthenticated) {
-      navigate("/offers");
-    } else {
-      // التوجيه لصفحة التسجيل وتمرير مسار العروض كـ state للعودة إليه بعد الدخول
-      navigate("/login", { state: { from: "/offers" } });
+    if (onNavigate) {
+      onNavigate("/offers");
     }
   };
 
@@ -386,7 +375,6 @@ export default function Offers({ id = "offers" }) {
       <div className="ellipse-top"></div>
 
       <div className="view-all-container">
-        {/* 4. ربط حدث الضغط بالدالة الجديدة */}
         <button className="view-all-btn" onClick={handleViewAllClick}>
           View All
         </button>

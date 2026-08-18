@@ -25,78 +25,63 @@ export default function ProductCard({ product }) {
   const { addToCart } = useCart();
   const [selectedColorIdx, setSelectedColorIdx] = useState(0);
 
-  // معرف المنتج الاصلي بدون إضافة كود اللون عليه
   const rawProductId = product.originalId || product.id;
+  const isSample = rawProductId === "sample-chair-1";
 
-  // الانتقال لصفحة التفاصيل فقط للمنتج السامبل
   const handleCardClick = () => {
-    if (rawProductId === "sample-chair-1") {
+    if (isSample) {
       navigate(`/product/${encodeURIComponent(rawProductId)}`);
     }
   };
 
-  const getCurrentColorHex = () => {
-    if (Array.isArray(product.colors) && product.colors.length > 0) {
-      const colorItem = product.colors[selectedColorIdx];
-      return typeof colorItem === "string" ? colorItem : colorItem?.hex;
-    }
-    return null;
+  // استخراج تفاصيل اللون الحالي
+  const currentColor =
+    product.colors?.[selectedColorIdx] || {
+      name: "Default",
+      hex: "#000",
+      image: product.image,
+    };
+  
+  // توليد معرف فريد يعتمد حصرياً على المعرف الأصلي + اسم اللون المختار
+  const uniqueId = `${rawProductId}-${currentColor.name}`;
+  const currentImage = currentColor.image || product.image;
+
+  // بناء كائن المنتج المستقل لكل لون
+  const productInstance = {
+    ...product,
+    id: uniqueId,
+    originalId: rawProductId,
+    name: `${product.name || product.title} (${currentColor.name})`,
+    title: `${product.name || product.title} (${currentColor.name})`,
+    material: product.material || product.subtitle || "",
+    selectedColor: currentColor.hex,
+    selectedColorName: currentColor.name,
+    image: currentImage,
   };
 
-  const currentColorHex = getCurrentColorHex();
-
-  const getProductImage = () => {
-    if (
-      Array.isArray(product.colors) &&
-      product.colors[selectedColorIdx]?.image
-    ) {
-      return product.colors[selectedColorIdx].image;
-    }
-    return (
-      product.image ||
-      (Array.isArray(product.colors) ? product.colors[0]?.image : "")
-    );
-  };
-
-  const currentImage = getProductImage();
-
-  // إضافة للمفضلة بالـ ID الأصلي النظيف
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
-    toggleFavorite({
-      ...product,
-      id: rawProductId, // استخدام الـ ID الأصلي لضمان توحيد المسارات
-      originalId: rawProductId,
-      selectedColor: currentColorHex,
-      image: currentImage,
-    });
+    toggleFavorite(productInstance);
   };
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    addToCart({
-      ...product,
-      id: `${rawProductId}-${currentColorHex || "default"}`,
-      name: product.name || product.title,
-      material: product.material || product.subtitle || "",
-      selectedColor: currentColorHex,
-      image: currentImage,
-    });
+    addToCart(productInstance);
   };
 
-  const isCurrentColorFav = isFavorite(rawProductId);
+  const isCurrentColorFav = isFavorite(uniqueId);
 
   return (
     <div
       onClick={handleCardClick}
       className={`bg-white rounded-[26px] overflow-hidden shadow-xs hover:shadow-md transition-all border border-gray-100 flex flex-col justify-between w-full group ${
-        rawProductId === "sample-chair-1" ? "cursor-pointer" : "cursor-default"
+        isSample ? "cursor-pointer" : "cursor-default"
       }`}
     >
       <div className="relative h-64 sm:h-72 w-full overflow-hidden">
         <img
           src={currentImage}
-          alt={product.name || product.title}
+          alt={productInstance.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
@@ -176,7 +161,7 @@ export default function ProductCard({ product }) {
                       : "hover:scale-105"
                   }`}
                   style={{ backgroundColor: hexColor }}
-                  title={`Select color ${idx + 1}`}
+                  title={colorItem.name || `Color ${idx + 1}`}
                 />
               );
             })}

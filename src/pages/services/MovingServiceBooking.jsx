@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MapPin,
   Calendar,
@@ -12,11 +13,17 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 
-// استيراد الصور بطريقة ES Modules (تغني تماماً عن استخدام require وتمنع خطأ Re-declaration)
+// استيراد الصور بطريقة ES Modules
 import mapImg from "@/assets/Group.png";
 import driverImg from "@/assets/Group 6356181.png";
 
 export default function MovingServiceBooking() {
+  const navigate = useNavigate();
+
+  // مرجع لحقول التاريخ والوقت لفتحها برمجياً عند النقر على الأيقونات الصفراء
+  const dateInputRef = useRef(null);
+  const timeInputRef = useRef(null);
+
   // حالة شاشة التتبع بعد التأكيد
   const [isConfirmed, setIsConfirmed] = useState(false);
 
@@ -48,6 +55,14 @@ export default function MovingServiceBooking() {
     }
     return base;
   };
+
+  // التحقق من اكتمال نموذج البيانات لتفعيل الزر
+  const isFormValid =
+    fromAddress.trim() !== "" &&
+    toAddress.trim() !== "" &&
+    date !== "" &&
+    time !== "" &&
+    calculatePrice() > 0;
 
   return (
     <div className="min-h-screen bg-[#F6EEE3]">
@@ -194,7 +209,7 @@ export default function MovingServiceBooking() {
                       type="text"
                       value={fromAddress}
                       onChange={(e) => setFromAddress(e.target.value)}
-                      placeholder=""
+                      placeholder="Enter pickup location"
                       className="w-full bg-white rounded-xl py-2.5 px-3 pr-9 border border-gray-200 outline-none focus:border-[#1B6D77] transition-all text-xs"
                     />
                     <MapPin
@@ -214,7 +229,7 @@ export default function MovingServiceBooking() {
                       type="text"
                       value={toAddress}
                       onChange={(e) => setToAddress(e.target.value)}
-                      placeholder=""
+                      placeholder="Enter destination location"
                       className="w-full bg-white rounded-xl py-2.5 px-3 pr-9 border border-gray-200 outline-none focus:border-[#1B6D77] transition-all text-xs"
                     />
                     <MapPin
@@ -230,28 +245,34 @@ export default function MovingServiceBooking() {
                     Moving Date & Time
                   </label>
                   <div className="flex-1 flex gap-2">
+                    {/* حقل التاريخ مع إخفاء أيقونة المتصفح */}
                     <div className="relative flex-1">
                       <input
+                        ref={dateInputRef}
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
-                        className="w-full bg-white rounded-xl py-2.5 px-2 pr-7 border border-gray-200 outline-none text-xs"
+                        className="w-full bg-white rounded-xl py-2.5 px-2 pr-7 border border-gray-200 outline-none text-xs cursor-pointer focus:border-[#1B6D77] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full"
                       />
                       <Calendar
                         size={15}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-600/70 pointer-events-none"
+                        onClick={() => dateInputRef.current?.showPicker?.()}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-600/70 cursor-pointer hover:text-[#1B6D77]"
                       />
                     </div>
+                    {/* حقل الوقت مع إخفاء أيقونة المتصفح */}
                     <div className="relative flex-1">
                       <input
+                        ref={timeInputRef}
                         type="time"
                         value={time}
                         onChange={(e) => setTime(e.target.value)}
-                        className="w-full bg-white rounded-xl py-2.5 px-2 pr-7 border border-gray-200 outline-none text-xs"
+                        className="w-full bg-white rounded-xl py-2.5 px-2 pr-7 border border-gray-200 outline-none text-xs cursor-pointer focus:border-[#1B6D77] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full"
                       />
                       <Clock
                         size={15}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-600/70 pointer-events-none"
+                        onClick={() => timeInputRef.current?.showPicker?.()}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-600/70 cursor-pointer hover:text-[#1B6D77]"
                       />
                     </div>
                   </div>
@@ -297,7 +318,7 @@ export default function MovingServiceBooking() {
                         <select
                           value={itemsSize}
                           onChange={(e) => setItemsSize(e.target.value)}
-                          className="w-full bg-white rounded-xl py-2.5 px-3 pr-8 border border-gray-200 outline-none appearance-none text-xs text-gray-700"
+                          className="w-full bg-white rounded-xl py-2.5 px-3 pr-8 border border-gray-200 outline-none appearance-none text-xs text-gray-700 cursor-pointer"
                         >
                           <option value="Small">Small</option>
                           <option value="Medium">Medium</option>
@@ -326,8 +347,13 @@ export default function MovingServiceBooking() {
               {/* Confirm Button */}
               <button
                 type="button"
+                disabled={!isFormValid}
                 onClick={() => setIsConfirmed(true)}
-                className="w-full mt-5 bg-[#D58C38] hover:bg-[#c27c2b] text-white font-bold py-3.5 px-6 rounded-2xl shadow-md transition-all cursor-pointer text-sm"
+                className={`w-full mt-5 font-bold py-3.5 px-6 rounded-2xl shadow-md transition-all text-sm ${
+                  isFormValid
+                    ? "bg-[#D58C38] hover:bg-[#c27c2b] text-white cursor-pointer"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
+                }`}
               >
                 Confirm
               </button>
@@ -421,10 +447,10 @@ export default function MovingServiceBooking() {
                   </div>
                 </div>
 
-                {/* زر Pay Now */}
+                {/* زر Pay Now التكيفي بالتوجه لصفحة الدفع */}
                 <button
                   type="button"
-                  onClick={() => alert("تمت عملية الدفع بنجاح!")}
+                  onClick={() => navigate("/payment")}
                   className="w-full bg-[#D58C38] hover:bg-[#c27c2b] text-white font-bold py-3.5 px-6 rounded-2xl shadow-md transition-all cursor-pointer text-sm"
                 >
                   Pay Now

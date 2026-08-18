@@ -42,10 +42,24 @@ export default function Navbar({ transparent = false }) {
     { name: "Review", target: "/#reviews" },
   ];
 
+
+const defaultAvatar = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+
+  // تم تحديث جلب الصورة والاسم ليأخذوا التحديثات المباشرة من قاعدة البيانات مع الحفاظ على القيم الافتراضية
   const userAvatar =
     user?.avatar ||
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100";
-  const userName = user?.name || "Ruba Ibrahem";
+    user?.avatar_url ||
+    user?.user_metadata?.avatar_url ||
+    user?.user_metadata?.picture ||
+    defaultAvatar;
+
+  const userName =
+    user?.name ||
+    user?.username ||
+    user?.user_metadata?.username ||
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "User";
 
   const scrollWithOffset = (el) => {
     const yCoordinate = el.getBoundingClientRect().top + window.pageYOffset;

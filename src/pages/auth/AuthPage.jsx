@@ -16,13 +16,15 @@ export default function AuthPage() {
   const handleAuthSubmit = async (email, password, isSignUp) => {
     try {
       if (isSignUp) {
-        await signup(email, password); // ✅ تسجيل جديد
+        await signup(email, password); 
       } else {
-        await login(email, password); // ✅ دخول عادي
+        await login(email, password); 
       }
       navigate("/");
     } catch (error) {
-      alert("Something went wrong. Please check your credentials.");
+      // تم إزالة الـ alert لتفادي ظهور النافذة السوداء المنبثقة، 
+      // والأخطاء يتم معالجتها وعرضها داخل الشريط الأحمر في الفورم نفسه.
+      throw error;
     }
   };
 
@@ -63,7 +65,7 @@ export default function AuthPage() {
           {activeTab === "signin" ? (
             <SignInForm onSubmit={(email, pass) => handleAuthSubmit(email, pass, false)} />
           ) : (
-            <SignUpForm onSubmit={(email, pass) => handleAuthSubmit(email, pass, true)} />
+            <SignUpForm />
           )}
         </div>
       </div>

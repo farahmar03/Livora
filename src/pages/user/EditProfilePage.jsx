@@ -1,40 +1,55 @@
-// src/pages/user/EditProfilePage.jsx
 import { useState, useEffect } from "react";
-import { FiCamera, FiEdit2, FiCheck } from "react-icons/fi";
+import { FiCamera, FiEdit2 } from "react-icons/fi";
 import Navbar from "@/components/layout/Navbar";
+import { supabase } from "../../services/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 export default function EditProfilePage() {
-  // 1. حالة البيانات
+  const { refreshProfile } = useAuth();
+
   const [formData, setFormData] = useState({
-    fullName: "Ruba Alzamly",
-    email: "____@gmail.com",
-    phone: "059_______",
-    dob: "30/December/2000",
-    gender: "Female",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=250&auto=format&fit=crop",
+    username: "",
+    email: "",
+    phone: "",
+    avatar: "",
   });
 
-  // حالة زر الحفظ
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // جلب البيانات المخزنة
+  const defaultAvatar = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+
+  const usernameRegex = /^[a-zA-Z0-9_]{8,}$/;
+  const isUsernameValid = usernameRegex.test(formData.username);
+
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
+    const fetchUserData = async () => {
       try {
-        const parsed = JSON.parse(savedUser);
-        setFormData((prev) => ({
-          ...prev,
-          fullName: parsed.username || parsed.fullName || prev.fullName,
-          email: parsed.email || prev.email,
-          phone: parsed.phone || prev.phone,
-          dob: parsed.dob || prev.dob,
-          gender: parsed.gender || prev.gender,
-        }));
-      } catch (e) {
-        console.error("Error reading saved user data", e);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const googleAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        setFormData({
+          username: profileData?.username || user.user_metadata?.username || user.user_metadata?.full_name || "",
+          email: user.email || "",
+          phone: profileData?.phone || "",
+          avatar: profileData?.avatar_url || googleAvatar || defaultAvatar,
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
       }
-    }
+    };
+
+    fetchUserData();
   }, []);
 
   const handleChange = (e) => {
@@ -43,24 +58,74 @@ export default function EditProfilePage() {
     setIsSaved(false);
   };
 
-  const handleGenderChange = (selectedGender) => {
-    setFormData((prev) => ({ ...prev, gender: selectedGender }));
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setFormData((prev) => ({ ...prev, avatar: previewUrl }));
     setIsSaved(false);
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, avatar: imageUrl }));
-      setIsSaved(false);
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem("user", JSON.stringify(formData));
-    setIsSaved(true);
+    
+    if (!isUsernameValid) {
+      setErrorMessage("Username must be at least 8 characters, English letters, numbers, or underscores only, with no spaces.");
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage("");
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No user logged in");
+
+      let avatarUrl = formData.avatar;
+
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split(".").pop();
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, selectedFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicURLData } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(filePath);
+
+        avatarUrl = publicURLData.publicUrl;
+      }
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          username: formData.username,
+          phone: formData.phone,
+          avatar_url: avatarUrl,
+          updated_at: new Date(),
+        })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
+      await refreshProfile();
+
+      setFormData((prev) => ({ ...prev, avatar: avatarUrl }));
+      setSelectedFile(null);
+      setIsSaved(true);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      setErrorMessage(error.message || "Failed to save changes. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -70,13 +135,18 @@ export default function EditProfilePage() {
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-10">
         <h1 className="text-3xl font-bold text-[var(--color-teal)] mb-6">Profile</h1>
 
-        {/* صورة البروفايل */}
+        {errorMessage && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-200 text-red-700 rounded-xl text-xs font-semibold max-w-md w-full text-center">
+            {errorMessage}
+          </div>
+        )}
+
         <div className="flex flex-col items-center mb-8">
           <div className="relative w-28 h-28 rounded-full shadow-sm">
             <img
-              src={formData.avatar}
+              src={formData.avatar || defaultAvatar}
               alt="Profile Avatar"
-              className="w-full h-full rounded-full object-cover"
+              className="w-full h-full rounded-full object-cover border-2 border-[var(--color-teal)]"
             />
             <label
               htmlFor="avatar-upload"
@@ -87,28 +157,32 @@ export default function EditProfilePage() {
                 id="avatar-upload"
                 type="file"
                 accept="image/*"
-                onChange={handleImageUpload}
+                onChange={handleImageSelect}
                 className="hidden"
               />
             </label>
           </div>
           <h2 className="text-[var(--color-teal)] font-semibold text-lg mt-3">
-            {formData.fullName || "User Name"}
+            {formData.username || "User Name"}
           </h2>
         </div>
 
-        {/* النموذج */}
         <form onSubmit={handleSubmit} className="w-full max-w-md flex flex-col gap-4">
-          
           <div className="flex flex-col gap-1.5">
-            <label className="text-gray-700 font-medium text-sm">User full name</label>
+            <label className="text-gray-700 font-medium text-sm">Username</label>
             <div className="relative w-full">
               <input
                 type="text"
-                name="fullName"
-                value={formData.fullName}
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
-                className="w-full px-5 py-3.5 rounded-2xl bg-white text-[var(--color-orange)] font-medium outline-none pr-12 shadow-sm border border-transparent focus:border-[var(--color-teal)] transition-all"
+                className={`w-full px-5 py-3.5 rounded-2xl bg-white text-[var(--color-orange)] font-medium outline-none pr-12 shadow-sm border transition-all ${
+                  formData.username && !isUsernameValid 
+                    ? "border-red-400" 
+                    : formData.username && isUsernameValid 
+                    ? "border-green-400" 
+                    : "border-transparent focus:border-[var(--color-teal)]"
+                }`}
               />
               <FiEdit2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
@@ -121,8 +195,8 @@ export default function EditProfilePage() {
                 type="email"
                 name="email"
                 value={formData.email}
-                onChange={handleChange}
-                className="w-full px-5 py-3.5 rounded-2xl bg-white text-[var(--color-orange)] font-medium outline-none pr-12 shadow-sm border border-transparent focus:border-[var(--color-teal)] transition-all"
+                disabled
+                className="w-full px-5 py-3.5 rounded-2xl bg-gray-100 text-gray-500 font-medium outline-none pr-12 shadow-sm border border-transparent cursor-not-allowed"
               />
               <FiEdit2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
@@ -142,56 +216,16 @@ export default function EditProfilePage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-gray-700 font-medium text-sm">Date of birth</label>
-            <div className="relative w-full">
-              <input
-                type="text"
-                name="dob"
-                value={formData.dob}
-                onChange={handleChange}
-                className="w-full px-5 py-3.5 rounded-2xl bg-white text-[var(--color-orange)] font-medium outline-none pr-12 shadow-sm border border-transparent focus:border-[var(--color-teal)] transition-all"
-              />
-              <FiEdit2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2 mt-1">
-            <label className="text-gray-700 font-medium text-sm">Gender</label>
-            <div className="flex items-center gap-8">
-              <button
-                type="button"
-                onClick={() => handleGenderChange("Male")}
-                className="flex items-center gap-2.5 cursor-pointer outline-none"
-              >
-                <div className={`w-5 h-5 rounded flex items-center justify-center transition-all ${formData.gender === "Male" ? "border border-[var(--color-teal)] bg-white text-[var(--color-teal)]" : "border border-gray-300 bg-white"}`}>
-                  {formData.gender === "Male" && <FiCheck size={14} className="stroke-[3]" />}
-                </div>
-                <span className="text-gray-800 font-medium text-sm">Male</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleGenderChange("Female")}
-                className="flex items-center gap-2.5 cursor-pointer outline-none"
-              >
-                <div className={`w-5 h-5 rounded flex items-center justify-center transition-all ${formData.gender === "Female" ? "border border-[var(--color-teal)] bg-white text-[var(--color-teal)]" : "border border-gray-300 bg-white"}`}>
-                  {formData.gender === "Female" && <FiCheck size={14} className="stroke-[3]" />}
-                </div>
-                <span className="text-gray-800 font-medium text-sm">Female</span>
-              </button>
-            </div>
-          </div>
-
           <button
             type="submit"
-            className={`w-full py-4 rounded-2xl font-bold text-lg mt-3 transition-all duration-300 shadow-md cursor-pointer ${
+            disabled={loading}
+            className={`w-full py-4 rounded-2xl font-bold text-lg mt-3 transition-all duration-300 shadow-md cursor-pointer disabled:opacity-50 ${
               isSaved
                 ? "bg-[var(--color-teal)] text-white hover:bg-[#15565e]"
                 : "bg-[var(--color-orange)] text-white hover:bg-[#c27d2f]"
             }`}
           >
-            {isSaved ? "Saved" : "Save"}
+            {loading ? "Saving..." : isSaved ? "Saved" : "Save"}
           </button>
         </form>
       </div>

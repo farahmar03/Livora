@@ -23,12 +23,12 @@ export default function HomePage() {
 
   // دالة الحماية: تستقبل المسار وتفحص حالة التسجيل
   const handleProtectedAction = (targetPath) => {
-    // navigate(targetPath);
-    if (user) {
-      navigate(targetPath); // مسجل دخول -> ينقله للصفحة مباشرة
-    } else {
-      setShowAuthModal(true); // غير مسجل -> يظهر المودال فوراً
-    }
+    navigate(targetPath);
+    // if (user) {
+    //   navigate(targetPath); // مسجل دخول -> ينقله للصفحة مباشرة
+    // } else {
+    //   setShowAuthModal(true); // غير مسجل -> يظهر المودال فوراً
+    // }
   };
 
   return (

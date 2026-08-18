@@ -23,26 +23,18 @@ export default function FavoritesPage() {
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
-  // الانتقال لصفحة تفاصيل المنتج بأسلوب آمن ومستخرج للـ ID الأصلي
   const handleProductClick = (product) => {
-    let targetId = product.originalId || product.id || product.title;
+    const originalId = String(product.originalId || "");
+    const currentId = String(product.id || "");
+    const productName = String(product.name || product.title || "");
 
-    // إزالة ملحق اللون إن وجد (مثل sofa-1-Orange -> sofa-1)
-    if (typeof targetId === "string" && targetId.includes("-")) {
-      const parts = targetId.split("-");
-      // إذا كان الجزء الاخير اسم لون معروف
-      if (
-        ["teal", "gray", "orange", "brown", "black"].includes(
-          parts[parts.length - 1].toLowerCase(),
-        )
-      ) {
-        parts.pop();
-        targetId = parts.join("-");
-      }
-    }
+    const isTargetSample =
+      originalId === "sample-chair-1" ||
+      currentId.startsWith("sample-chair-1") ||
+      productName.includes("Nordic OAK Chair");
 
-    if (targetId) {
-      navigate(`/product/${encodeURIComponent(targetId)}`);
+    if (isTargetSample) {
+      navigate(`/product/${encodeURIComponent("sample-chair-1")}`);
     }
   };
 
@@ -62,102 +54,115 @@ export default function FavoritesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {favorites.map((product) => (
-              <div
-                key={product.id || product.title}
-                onClick={() => handleProductClick(product)}
-                className="bg-white rounded-[26px] overflow-hidden shadow-xs hover:shadow-md transition-all border border-gray-100 flex flex-col justify-between cursor-pointer group"
-              >
-                <div className="relative h-64 sm:h-72 w-full overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={product.name || product.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+            {favorites.map((product) => {
+              const originalId = String(product.originalId || "");
+              const currentId = String(product.id || "");
+              const productName = String(product.name || product.title || "");
 
-                  {/* Rating */}
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-full flex items-center gap-1 text-xs font-bold text-gray-800 shadow-xs">
-                    <Star size={13} className="fill-amber-400 text-amber-400" />
-                    <span>{product.rating || 4.9}</span>
-                  </div>
+              const isSample =
+                originalId === "sample-chair-1" ||
+                currentId.startsWith("sample-chair-1") ||
+                productName.includes("Nordic OAK Chair");
 
-                  {/* زر المفضلة للحذف المباشر */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(product);
-                    }}
-                    className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs p-2 rounded-full text-red-500 hover:scale-110 transition-all shadow-xs cursor-pointer"
-                    title="Remove from favorites"
-                  >
-                    <Heart size={16} className="fill-red-500 text-red-500" />
-                  </button>
+              return (
+                <div
+                  key={product.id || product.title}
+                  onClick={() => handleProductClick(product)}
+                  className={`bg-white rounded-[26px] overflow-hidden shadow-xs hover:shadow-md transition-all border border-gray-100 flex flex-col justify-between group ${
+                    isSample ? "cursor-pointer" : "cursor-default"
+                  }`}
+                >
+                  <div className="relative h-64 sm:h-72 w-full overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={product.name || product.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
 
-                  {product.discount && (
-                    <div className="absolute bottom-2 right-0 bg-[#E52E2E] text-white text-[11px] font-bold px-3 py-1 rounded-l-md shadow-md">
-                      Discount 10%
+                    {/* Rating */}
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-full flex items-center gap-1 text-xs font-bold text-gray-800 shadow-xs">
+                      <Star size={13} className="fill-amber-400 text-amber-400" />
+                      <span>{product.rating || 4.9}</span>
                     </div>
-                  )}
-                </div>
 
-                <div className="p-5">
-                  <h3 className="text-base font-bold text-gray-900 mb-0.5">
-                    {product.name || product.title}
-                  </h3>
-                  <p className="text-xs text-gray-500 mb-2">
-                    {product.material || product.subtitle}
-                  </p>
-
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-lg font-bold text-gray-900">
-                      {typeof product.price === "number"
-                        ? `$${product.price.toLocaleString()}`
-                        : product.price}
-                    </span>
-
+                    {/* زر المفضلة للحذف المباشر */}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        addToCart({
-                          id: product.id || product.title,
-                          originalId: product.originalId || product.id,
-                          title: product.name || product.title,
-                          name: product.name || product.title,
-                          image: product.image,
-                          price: product.price,
-                          material: product.material || product.subtitle,
-                        });
+                        toggleFavorite(product);
                       }}
-                      className="text-[#1B6D77] hover:text-[#135158] transition-colors p-1 cursor-pointer"
-                      title="Add to Cart"
+                      className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs p-2 rounded-full text-red-500 hover:scale-110 transition-all shadow-xs cursor-pointer"
+                      title="Remove from favorites"
                     >
-                      <FontAwesomeCartIcon className="w-7 h-7 text-[#1B6D77] hover:text-[#135158]" />
+                      <Heart size={16} className="fill-red-500 text-red-500" />
                     </button>
+
+                    {product.discount && (
+                      <div className="absolute bottom-2 right-0 bg-[#E52E2E] text-white text-[11px] font-bold px-3 py-1 rounded-l-md shadow-md">
+                        Discount 10%
+                      </div>
+                    )}
                   </div>
 
-                  {/* دوائر الألوان للمنتج */}
-                  {product.colors && (
-                    <div className="flex items-center gap-2 mt-3">
-                      {product.colors.map((colorObj, cIdx) => {
-                        const colorHex =
-                          typeof colorObj === "string"
-                            ? colorObj
-                            : colorObj.hex;
-                        return (
-                          <span
-                            key={cIdx}
-                            className="w-4 h-4 rounded-full border border-gray-200"
-                            style={{ backgroundColor: colorHex }}
-                          />
-                        );
-                      })}
+                  <div className="p-5">
+                    <h3 className="text-base font-bold text-gray-900 mb-0.5">
+                      {product.name || product.title}
+                    </h3>
+                    <p className="text-xs text-gray-500 mb-2">
+                      {product.material || product.subtitle}
+                    </p>
+
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-lg font-bold text-gray-900">
+                        {typeof product.price === "number"
+                          ? `$${product.price.toLocaleString()}`
+                          : product.price}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart({
+                            id: product.id || product.title,
+                            originalId: product.originalId || product.id,
+                            title: product.name || product.title,
+                            name: product.name || product.title,
+                            image: product.image,
+                            price: product.price,
+                            material: product.material || product.subtitle,
+                          });
+                        }}
+                        className="text-[#1B6D77] hover:text-[#135158] transition-colors p-1 cursor-pointer"
+                        title="Add to Cart"
+                      >
+                        <FontAwesomeCartIcon className="w-7 h-7 text-[#1B6D77] hover:text-[#135158]" />
+                      </button>
                     </div>
-                  )}
+
+                    {/* دوائر الألوان للمنتج */}
+                    {product.colors && (
+                      <div className="flex items-center gap-2 mt-3">
+                        {product.colors.map((colorObj, cIdx) => {
+                          const colorHex =
+                            typeof colorObj === "string"
+                              ? colorObj
+                              : colorObj.hex;
+                          return (
+                            <span
+                              key={cIdx}
+                              className="w-4 h-4 rounded-full border border-gray-200"
+                              style={{ backgroundColor: colorHex }}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
