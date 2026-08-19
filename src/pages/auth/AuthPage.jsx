@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import SignInForm from "@/components/auth/SignInForm";
-import SignUpForm from "@/components/auth/SignUpForm";
+import SignUpForm from "@/components/auth/SignupForm";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AuthPage() {
